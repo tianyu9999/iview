@@ -1,7 +1,7 @@
 <template>
     <button :type="htmlType" :class="classes" :disabled="disabled" @click="handleClick">
         <Icon class="ivu-load-loop" type="load-c" v-if="loading"></Icon>
-        <Icon :type="icon" v-if="icon && !loading"></Icon>
+        <Icon :type="icon" v-if="(icon || img) && !loading" :title="title" :icon="img"></Icon>
         <span v-if="showSlot" ref="slot"><slot></slot></span>
     </button>
 </template>
@@ -39,6 +39,10 @@
                 }
             },
             icon: String,
+			//添加提示 20170507
+			title: String,
+			//添加图标 20170507
+			img: String,
             long: {
                 type: Boolean,
                 default: false
