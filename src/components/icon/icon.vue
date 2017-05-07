@@ -1,5 +1,5 @@
 <template>
-    <i :class="classes" :style="styles"></i>
+    <i :class="classes" :style="styles" :title="title"></i>
 </template>
 <script>
     const prefixCls = 'ivu-icon';
@@ -9,10 +9,17 @@
         props: {
             type: String,
             size: [Number, String],
-            color: String
+            color: String,
+			//添加提示 20170507
+			title: String,
+			//添加图标 20170507
+			icon: String
         },
         computed: {
             classes () {
+				if(this.icon){
+					return `${this.icon}`;
+				}
                 return `${prefixCls} ${prefixCls}-${this.type}`;
             },
             styles () {
