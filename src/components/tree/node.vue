@@ -11,13 +11,16 @@
                     :indeterminate="indeterminate"
                     :disabled="data.disabled || data.disableCheckbox"
                     @click.native.prevent="handleCheck"></Checkbox>
-                <span :class="titleClasses" v-html="data.title" @click="handleSelect"></span>
+				<span :class="titleClasses"  @click="handleSelect">
+					<node-content :data="data"></node-content>
+				</span>		
                 <Tree-node
                     v-for="item in data.children"
                     :key="item"
                     :data="item"
                     :visible="data.expand"
                     :multiple="multiple"
+					:render-content="renderContent"
                     :show-checkbox="showCheckbox">
                 </Tree-node>
             </li>
@@ -35,7 +38,28 @@
     export default {
         name: 'TreeNode',
         mixins: [ Emitter ],
-        components: { Checkbox, Icon },
+        components: { Checkbox, Icon,   
+			//添加节点渲染 20170507
+			NodeContent: {
+				props: {
+					data: {
+						type: Object,
+						default () {
+							return {};
+						}
+					}
+				},
+				render(h) {
+					const parent = this.$parent;
+					const data = this.data;
+					return (
+							parent.renderContent
+							? parent.renderContent.call(parent._renderProxy, h, data)
+							:h('span',this.data.title )
+					);
+				}
+			} 
+		},
         props: {
             data: {
                 type: Object,
@@ -54,7 +78,9 @@
             visible: {
                 type: Boolean,
                 default: false
-            }
+            },
+			//添加节点渲染 20170507
+			renderContent: Function
         },
         data () {
             return {
@@ -81,7 +107,7 @@
                     {
                         [`${prefixCls}-arrow-disabled`]: this.data.disabled,
                         [`${prefixCls}-arrow-open`]: this.data.expand,
-                        [`${prefixCls}-arrow-hidden`]: !(this.data.children && this.data.children.length)
+                        [`${prefixCls}-arrow-hidden`]: !(this.data.children)
                     }
                 ];
             },

@@ -6,6 +6,7 @@
             :data="item"
             visible
             :multiple="multiple"
+			:render-content="renderContent"
             :show-checkbox="showCheckbox">
         </Tree-node>
         <div :class="[prefixCls + '-empty']" v-if="!data.length">{{ localeEmptyText }}</div>
@@ -40,7 +41,11 @@
             },
             emptyText: {
                 type: String
-            }
+            },
+			//添加节点渲染 20170507
+			renderContent: Function,
+			//添加数据过滤 20170507
+			filterNodeMethod: Function
         },
         data () {
             return {
@@ -98,7 +103,11 @@
                 }
                 this.data.map(node => reverseChecked(node)).map(node => forwardChecked(node));
                 this.broadcast('TreeNode', 'indeterminate');
-            }
+            },
+			//添加数据过滤 20170507
+			filter(value) {
+				if (!this.filterNodeMethod) throw new Error('[Tree] filterNodeMethod is required when filter');
+			}
         },
         mounted () {
             this.updateData();
