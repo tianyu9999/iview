@@ -684,7 +684,9 @@
         },
         watch: {
             data: {
-                handler () {
+			    //添加立即模式 20170507
+				immediate: true,
+                handler (val) {
                     this.objData = this.makeObjData();
                     this.rebuildData = this.makeDataWithSortAndFilter();
                     this.handleResize();
