@@ -9,7 +9,7 @@
                 <Icon type="ios-close-empty" @click.native.stop="removeTag(index)"></Icon>
             </div>
             <span :class="[prefixCls + '-placeholder']" v-show="showPlaceholder && !filterable">{{ localePlaceholder }}</span>
-            <span :class="[prefixCls + '-selected-value']" v-show="!showPlaceholder && !multiple && !filterable">{{ selectedSingle }}</span>
+            <span :class="[prefixCls + '-selected-value']" v-show="!showPlaceholder && !multiple && !filterable" v-text="selectedSingle"></span>
             <input
                 type="text"
                 v-if="filterable"
@@ -220,11 +220,12 @@
                     if (name) {
                         cb(child);
                     } else if (child.$children.length) {
-                        _this.$nextTick(() => {
+						//注释nextTick 影响后续默认值选行 20170507
+                        //_this.$nextTick(() => {
                             child.$children.forEach((innerChild) => {
                                 find(innerChild, cb);
                             });
-                        })
+                        //})
                     }
                 };
 
@@ -255,7 +256,6 @@
                 });
 
                 this.options = options;
-
                 if (init) {
                     if (!this.remote) {
                         this.updateSingleSelected(true, slot);
@@ -265,10 +265,9 @@
             },
             updateSingleSelected (init = false, slot = false) {
                 const type = typeof this.model;
-
+				
                 if (type === 'string' || type === 'number') {
                     let findModel = false;
-
                     for (let i = 0; i < this.options.length; i++) {
                         if (this.model === this.options[i].value) {
                             this.selectedSingle = this.options[i].label;
