@@ -460,6 +460,8 @@
             sortData (data, type, index) {
                 const key = this.cloneColumns[index].key;
                 data.sort((a, b) => {
+					a=a.item;
+					b=b.item;
                     if (this.cloneColumns[index].sortMethod) {
                         return this.cloneColumns[index].sortMethod(a[key], b[key], type);
                     } else {
@@ -545,8 +547,10 @@
                 this.rebuildData = filterData;
             },
             makeData () {
-                let data = deepCopy(this.data);
-                data.forEach((row, index) => row._index = index);
+                let data =[];
+				for(let n in this.objData){
+					data.push(this.objData[n]);
+				}
                 return data;
             },
             makeDataWithSort () {
@@ -579,7 +583,7 @@
             makeObjData () {
                 let data = {};
                 this.data.forEach((row, index) => {
-                    const newRow = deepCopy(row);// todo 直接替换
+                    const newRow ={};// deepCopy(row);// todo 直接替换
                     newRow._isHover = false;
                     if(newRow._disabled){
                         newRow._isDisabled = newRow._disabled;
@@ -596,6 +600,8 @@
                     } else {
                         newRow._isHighlight = false;
                     }
+					newRow.item = row;
+					newRow._index = index;
                     data[index] = newRow;
                 });
                 return data;

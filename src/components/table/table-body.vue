@@ -16,7 +16,7 @@
                     <Cell
                         :fixed="fixed"
                         :prefix-cls="prefixCls"
-                        :row="row"
+                        :row="row.item"
                         :column="column"
                         :natural-index="index"
                         :index="row._index"
