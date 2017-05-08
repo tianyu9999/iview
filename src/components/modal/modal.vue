@@ -169,8 +169,9 @@
                 if (this.loading) {
                     this.buttonLoading = true;
                 } else {
-                    this.visible = false;
-                    this.$emit('input', false);
+					//取消消失由外面控制
+                    //this.visible = false;
+                    //this.$emit('input', false);
                 }
                 this.$emit('on-ok');
             },
