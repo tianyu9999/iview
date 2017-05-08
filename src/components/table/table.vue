@@ -273,7 +273,8 @@
                         height = this.bodyHeight;
                     }
 //                    style.height = this.scrollBarWidth > 0 ? `${this.bodyHeight}px` : `${this.bodyHeight - 1}px`;
-                    style.height = this.scrollBarWidth > 0 ? `${height}px` : `${height - 1}px`;
+					//固定列时，滚动条少算
+                    style.height = this.scrollBarWidth > 0 ? `${height-11}px` : `${height - 1}px`;
                 }
                 return style;
             },
