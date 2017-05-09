@@ -1,17 +1,15 @@
 <template>
     <div :class="wrapClasses">
-        <div :class="handlerClasses">
+        <div :class="handlerClasses" @mouse.down="preventDefault" @click="preventDefault">
             <a
-                @click="up"
-                @mouse.down="preventDefault"
+                @click="up"               
                 :class="upClasses">
-                <span :class="innerUpClasses" @click="preventDefault"></span>
+                <span :class="innerUpClasses"></span>
             </a>
             <a
                 @click="down"
-                @mouse.down="preventDefault"
                 :class="downClasses">
-                <span :class="innerDownClasses" @click="preventDefault"></span>
+                <span :class="innerDownClasses"></span>
             </a>
         </div>
         <div :class="inputWrapClasses">
@@ -24,7 +22,7 @@
                 @blur="blur"
                 @keydown.stop="keyDown"
                 @change="change"
-                :value="value">
+                :value="currentValue">
         </div>
     </div>
 </template>
@@ -151,7 +149,22 @@
         },
         methods: {
             preventDefault (e) {
-                e.preventDefault();
+				e = (e) ? e : ((window.event) ? window.event : null); 
+				e = e || window.event; // firefox下window.event为null, IE下event为null
+
+				//阻止默认浏览器动作(W3C) 
+				if ( e ){
+					if(e.preventDefault){
+						//IE中阻止函数器默认动作的方式 
+						e.preventDefault(); 
+						 //因此它支持W3C的stopPropagation()方法 
+						e.stopPropagation(); 
+					}else{
+						e.returnValue = false;
+						e.cancelBubble = true;
+					}
+				}
+				return false;
             },
             up (e) {
                 const targetVal = Number(e.target.value);

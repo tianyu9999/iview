@@ -1,19 +1,23 @@
 <template>
-    <div :class="classes" ref="cell">
-        <template v-if="renderType === 'index'">{{naturalIndex + 1}}</template>
-        <template v-if="renderType === 'selection'">
-            <Checkbox :value="checked" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
-        </template>
-        <template v-if="renderType === 'normal'"><span v-html="row[column.key]"></span></template>
-    </div>
+	<div :class="classesCon" v-clickoutside="handleHide" @click="cellClickHandel">
+		<div :class="classes" ref="cell">
+			<template v-if="renderType === 'index'">{{naturalIndex + 1}}</template>
+			<template v-if="renderType === 'selection'">
+				<Checkbox :value="checked" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
+			</template>
+			<template v-if="renderType === 'normal'"><span v-html="row[column.key]"></span></template>
+		</div>
+	</div>
 </template>
 <script>
     import Vue from 'vue';
     import Checkbox from '../checkbox/checkbox.vue';
+	import Clickoutside from '../../utils/clickoutside';	
 
     export default {
         name: 'TableCell',
-        components: { Checkbox },
+        components: { Checkbox },	
+		directives: { Clickoutside },		
         props: {
             prefixCls: String,
             row: Object,
@@ -31,7 +35,10 @@
             return {
                 renderType: '',
                 uid: -1,
-                context: this.$parent.$parent.currentContext
+                context: this.$parent.$parent.currentContext,
+				oldRenderType:null,
+				renderCell:null,
+				editCell:null
             };
         },
         computed: {
@@ -43,7 +50,16 @@
                         [`${this.prefixCls}-cell-ellipsis`]: this.column.ellipsis || false
                     }
                 ];
-            }
+            },
+			classesCon () {
+				return [
+					`${this.prefixCls}-cell-container`,
+					{
+                        [`${this.prefixCls}-hidden`]: !this.fixed && this.column.fixed && (this.column.fixed === 'left' || this.column.fixed === 'right'),
+                        [`${this.prefixCls}-cell-ellipsis`]: this.column.ellipsis || false
+                    }
+				];
+			}
         },
         methods: {
             compile () {
@@ -64,15 +80,17 @@
                                 return this.column.render(h, this.row, this.column, this.index);
                             }
                         });
-                        const Cell = component.$mount();
-                        this.$refs.cell.appendChild(Cell.$el);
+						component.row = this.row;
+                        component.column = this.column;
+                        this.renderCell = component.$mount();
+                        this.$refs.cell.appendChild(this.renderCell.$el);
                     } else {
                         const $parent = this.context;
                         const template = this.column.render(this.row, this.column, this.index);
                         const cell = document.createElement('div');
                         cell.innerHTML = template;
 
-                        this.$el.innerHTML = '';
+                        this.$refs.cell.innerHTML = '';
                         let methods = {};
                         Object.keys($parent).forEach(key => {
                             const func = $parent[key];
@@ -99,8 +117,8 @@
                         component.row = this.row;
                         component.column = this.column;
 
-                        const Cell = component.$mount();
-                        this.$refs.cell.appendChild(Cell.$el);
+                        this.renderCell = component.$mount();
+                        this.$refs.cell.appendChild(this.renderCell.$el);
                     }
                 }
             },
@@ -109,7 +127,43 @@
             },
             toggleSelect () {
                 this.$parent.$parent.toggleSelect(this.index);
-            }
+            },
+			cellClickHandel(){
+				if(this.renderType === 'edit'){
+					return;
+				}
+				if(this.column.editRender){
+					this.oldRenderType = this.renderType;
+					this.renderType = 'edit';
+					if(this.renderCell){
+						this.$refs.cell.innerHTML = '';
+					}
+					if(this.editCell){
+						this.$refs.cell.appendChild(this.editCell.$el);
+					}else{
+						const component = new Vue({
+							functional: true,
+							template:this.column.editRender(this.row, this.column)					
+						});
+						component.row = this.row;
+                        component.column = this.column;
+						this.editCell = component.$mount();
+						this.$refs.cell.appendChild(this.editCell.$el);
+					}
+				}
+			},
+			handleHide(){
+				if(this.$refs.cell && this.editCell && this.oldRenderType && this.renderType === 'edit'){
+					this.renderType = this.oldRenderType;
+					this.oldRenderType = null;
+					if(this.editCell){
+						this.$refs.cell.innerHTML = '';
+					}
+					if(this.renderCell){						
+						this.$refs.cell.appendChild(this.renderCell.$el);
+					}
+				}
+			}
         },
         created () {
             if (this.column.type === 'index') {
