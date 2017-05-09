@@ -701,8 +701,8 @@
                     setTimeout(() => {
                         this.cloneData = deepCopy(this.data);
                     }, 0);
-                },
-                deep: true
+                }
+                //deep: true
             },
             columns: {
                 handler () {
