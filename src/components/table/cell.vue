@@ -152,7 +152,10 @@
 					}
 					if(this.editCell._vnode.componentInstance && this.editCell._vnode.componentInstance.focus){
 						const g=this;
-						this.$nextTick(()=>{g.editCell._vnode.componentInstance.focus()});
+						this.$nextTick(()=>{
+							g.editCell._vnode.componentInstance.focus();
+							
+						});
 					}
 				}
 			},

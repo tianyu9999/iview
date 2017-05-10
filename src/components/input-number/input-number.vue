@@ -227,7 +227,23 @@
             },
             focus () {
                 this.focused = true;
-				this.$refs.textinput.focus();
+				
+				const obj = this.$refs.textinput;
+				obj.focus();
+				this.$nextTick(()=>{
+					var len = 0;
+					if(obj.value){
+						len=obj.value.length;
+					}
+					if(obj.setSelectionRange){
+						obj.setSelectionRange(len,len);
+					}else{
+						const txt =obj.createTextRange(); 
+						txt.moveStart('character',len); 
+						txt.collapse(true); 
+						txt.select(); 
+					}			
+				});
             },
             blur () {
                 this.focused = false;

@@ -197,11 +197,28 @@
                 this.textareaStyles = calcTextareaHeight(this.$refs.textarea, minRows, maxRows);
             },
 			focus (){
+				var obj = null;
 				if (this.type !== 'textarea') {
-					this.$refs.textinput.focus();
+					obj=this.$refs.textinput;
+					obj.focus();
 				}else{
-					this.$refs.textarea.focus();
+					obj=this.$refs.textarea;
+					obj.focus();
 				}
+				this.$nextTick(()=>{
+					var len = 0;
+					if(obj.value){
+						len=obj.value.length;
+					}
+					if(obj.setSelectionRange){
+						obj.setSelectionRange(len,len);
+					}else{
+						const txt =obj.createTextRange(); 
+						txt.moveStart('character',len); 
+						txt.collapse(true); 
+						txt.select(); 
+					}			
+				});
 			}
         },
         watch: {
