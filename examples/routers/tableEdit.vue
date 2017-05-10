@@ -12,7 +12,7 @@
             return {
                 data1: 1,
 //                self: this,
-                columns7: [
+                columns7: [{key:'radio',type:'radio'},
                     {
                         title: '姓名',
                         key: 'name',
