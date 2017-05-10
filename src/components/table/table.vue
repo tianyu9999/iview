@@ -168,6 +168,7 @@
                 showSlotFooter: true,
                 bodyHeight: 0,
                 bodyRealHeight: 0,
+				isSingleSelect:null,
                 scrollBarWidth: getScrollBarSize(),
                 currentContext: this.context,
                 cloneData: deepCopy(this.data)    // when Cell has a button to delete row data, clickCurrentRow will throw an error, so clone a data
@@ -374,6 +375,9 @@
             },
             clickCurrentRow (_index) {
                 this.highlightCurrentRow (_index);
+				if(this.isSingleSelect){
+					this.singleSelect(_index);
+				}
                 this.$emit('on-row-click', this.objData[_index]);
             },
             dblclickCurrentRow (_index) {
@@ -622,7 +626,7 @@
                 let left = [];
                 let right = [];
                 let center = [];
-
+				const g = this;
                 columns.forEach((column, index) => {
                     column._index = index;
                     column._width = column.width ? column.width : '';    // update in handleResize()
@@ -648,6 +652,9 @@
                     } else {
                         center.push(column);
                     }
+					if(column.type === 'radio'){
+						g.isSingleSelect = true;
+					}
                 });
                 return left.concat(center).concat(right);
             },
@@ -676,7 +683,17 @@
 
                 const data = Csv(columns, datas, ',', noHeader);
                 ExportCsv.download(params.filename, data);
-            }
+            },
+			single (){
+				let columns = this.columns;
+				const g = this;
+				columns.forEach((column, index) => {
+					if(column.type === 'radio'){
+						g.isSingleSelect = true;
+						return false;
+					}
+				 });
+			}
         },
         created () {
             if (!this.context) this.currentContext = this.$parent;
@@ -688,6 +705,7 @@
             this.handleResize();
             this.fixedHeader();
             this.$nextTick(() => this.ready = true);
+			this.single();
             window.addEventListener('resize', this.handleResize, false);
             this.$on('on-visible-change', (val) => {
                 if (val) {
