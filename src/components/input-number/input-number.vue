@@ -22,6 +22,7 @@
                 @blur="blur"
                 @keydown.stop="keyDown"
                 @change="change"
+				ref="textinput"
                 :value="currentValue">
         </div>
     </div>
@@ -226,6 +227,7 @@
             },
             focus () {
                 this.focused = true;
+				this.$refs.textinput.focus();
             },
             blur () {
                 this.focused = false;

@@ -17,6 +17,7 @@
                 :value="currentValue"
                 :number="number"
                 :autofocus="autofocus"
+				ref="textinput"
                 @keyup.enter="handleEnter"
                 @focus="handleFocus"
                 @blur="handleBlur"
@@ -194,7 +195,14 @@
                 const maxRows = autosize.maxRows;
 
                 this.textareaStyles = calcTextareaHeight(this.$refs.textarea, minRows, maxRows);
-            }
+            },
+			focus (){
+				if (this.type !== 'textarea') {
+					this.$refs.textinput.focus();
+				}else{
+					this.$refs.textarea.focus();
+				}
+			}
         },
         watch: {
             value (val) {
