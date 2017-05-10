@@ -381,30 +381,40 @@
                 this.$emit('on-row-dblclick', this.objData[_index]);
             },
             getSelection () {
-                let selectionIndexes = [];
+                let selection = [];
                 for (let i in this.objData) {
-                    if (this.objData[i]._isChecked) selectionIndexes.push(parseInt(i));
+                    if (this.objData[i]._isChecked) selection.push(this.objData[i]);
                 }
-                return JSON.parse(JSON.stringify(this.data.filter((data, index) => selectionIndexes.indexOf(index) > -1)));
+                return selection;
             },
             toggleSelect (_index) {
-                let data = {};
-
-                for (let i in this.objData) {
-                    if (parseInt(i) === _index) {
-                        data = this.objData[i];
-                    }
-                }
+                let data = this.objData[_index+''];
+				
                 const status = !data._isChecked;
 
                 this.objData[_index]._isChecked = status;
 
                 const selection = this.getSelection();
                 if (status) {
-                    this.$emit('on-select', selection, JSON.parse(JSON.stringify(this.data[_index])));
+                    this.$emit('on-select', selection, this.data);
                 }
                 this.$emit('on-selection-change', selection);
             },
+			singleSelect (_index) {
+				let data = this.objData[_index+''];
+				
+                const status = !data._isChecked;
+
+                this.objData[_index]._isChecked = status;
+				
+				if(status){
+					for (let i in this.objData) {
+						if (this.objData[i] != data && this.objData[i]._isChecked) {
+							this.objData[i]._isChecked = false;
+						}
+					}
+				}
+			},
             selectAll (status) {
                 // this.rebuildData.forEach((data) => {
                 //     if(this.objData[data._index]._isDisabled){

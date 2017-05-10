@@ -5,6 +5,9 @@
 			<template v-if="renderType === 'selection'">
 				<Checkbox :value="checked" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
 			</template>
+			<template v-if="renderType === 'radio'">
+				<radio v-model="radioCheck" @on-change="singleSelect" :disabled="disabled"></radio>
+			</template>
 			<template v-if="renderType === 'normal'"><span v-html="row[column.key]"></span></template>
 		</div>
 	</div>
@@ -38,7 +41,8 @@
                 context: this.$parent.$parent.currentContext,
 				oldRenderType:null,
 				renderCell:null,
-				editCell:null
+				editCell:null,
+				radioCheck:false
             };
         },
         computed: {
@@ -128,6 +132,9 @@
             toggleSelect () {
                 this.$parent.$parent.toggleSelect(this.index);
             },
+			singleSelect () {
+				 this.$parent.$parent.singleSelect(this.index);
+			},
 			cellClickHandel(){
 				if(this.renderType === 'edit'){
 					return;
@@ -179,7 +186,9 @@
                 this.renderType = 'selection';
             } else if (this.column.render) {
                 this.renderType = 'render';
-            } else {
+            } else if(this.column.type === 'radio'){
+				this.renderType = 'radio';
+			}else {
                 this.renderType = 'normal';
             }
         },
@@ -195,7 +204,10 @@
             naturalIndex () {
                 this.destroy();
                 this.compile();
-            }
+            },
+			checked (val) {
+				this.radioCheck = val;
+			}
         }
     };
 </script>
