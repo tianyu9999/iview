@@ -180,6 +180,10 @@ const router = new VueRouter({
         {
             path: '/notice',
             component: require('./routers/notice.vue')
+        },
+		 {
+            path: '/tableEdit',
+            component: require('./routers/tableEdit.vue')
         }
     ]
 });
