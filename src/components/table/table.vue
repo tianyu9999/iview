@@ -369,16 +369,16 @@
                     }
                 }
                 this.objData[_index]._isHighlight = true;
-                const oldData = oldIndex < 0 ? null : JSON.parse(JSON.stringify(this.cloneData[oldIndex]));
-                this.$emit('on-current-change', JSON.parse(JSON.stringify(this.cloneData[_index])), oldData);
+                const oldData = oldIndex < 0 ? null : this.objData[oldIndex];
+                this.$emit('on-current-change', this.objData[_index], oldData);
             },
             clickCurrentRow (_index) {
                 this.highlightCurrentRow (_index);
-                this.$emit('on-row-click', JSON.parse(JSON.stringify(this.cloneData[_index])));
+                this.$emit('on-row-click', this.objData[_index]);
             },
             dblclickCurrentRow (_index) {
                 this.highlightCurrentRow (_index);
-                this.$emit('on-row-dblclick', JSON.parse(JSON.stringify(this.cloneData[_index])));
+                this.$emit('on-row-dblclick', this.objData[_index]);
             },
             getSelection () {
                 let selectionIndexes = [];
