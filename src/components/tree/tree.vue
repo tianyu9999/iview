@@ -80,7 +80,7 @@
                             if (node.checked) checkedLength++;
                         });
                         if (isInit) {
-                            if (checkedLength >= data.children.length) data.checked = true;
+                            if (checkedLength >= data.children.length && data.children.length>0) data.checked = true;
                         } else {
                             data.checked = checkedLength >= data.children.length;
                         }
