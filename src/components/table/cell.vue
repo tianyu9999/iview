@@ -16,12 +16,12 @@
 <script>
     import Vue from 'vue';
     import Checkbox from '../checkbox/checkbox.vue';
-	import Clickoutside from '../../utils/clickoutside';	
+	import clickoutside from '../../directives/clickoutside';	
 
     export default {
         name: 'TableCell',
         components: { Checkbox },	
-		directives: { Clickoutside },		
+		directives: { clickoutside },		
         props: {
             prefixCls: String,
             row: Object,
