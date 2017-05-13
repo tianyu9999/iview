@@ -8,7 +8,8 @@
 			<template v-if="renderType === 'radio'">
 				<radio v-model="radioCheck" @on-change="singleSelect" :disabled="disabled"></radio>
 			</template>
-			<template v-if="renderType === 'normal'"><span v-html="row[column.key]"></span></template>
+			<template v-if="renderType === 'normal'"><span v-text="row[column.key]"></span></template>
+			<template v-if="renderType === 'render' || renderType==='edit'"><span ref="renderContainer"></span></template>
 		</div>
 	</div>
 </template>
@@ -87,7 +88,7 @@
 						component.row = this.row;
                         component.column = this.column;
                         this.renderCell = component.$mount();
-                        this.$refs.cell.appendChild(this.renderCell.$el);
+                        this.$refs.renderContainer.appendChild(this.renderCell.$el);
                     } else {
                         const $parent = this.context;
                         const template = this.column.render(this.row, this.column, this.index);
@@ -122,12 +123,17 @@
                         component.column = this.column;
 
                         this.renderCell = component.$mount();
-                        this.$refs.cell.appendChild(this.renderCell.$el);
+                        this.$refs.renderContainer.appendChild(this.renderCell.$el);
                     }
                 }
             },
             destroy () {
-
+				if(this.renderCell){
+					this.renderCell.destroy();
+				}
+				if(this.editCell){
+					this.editCell.destroy();
+				}
             },
             toggleSelect () {
                 this.$parent.$parent.toggleSelect(this.index);
@@ -142,39 +148,41 @@
 				if(this.column.editRender){
 					this.oldRenderType = this.renderType;
 					this.renderType = 'edit';
-					if(this.renderCell){
-						this.$refs.cell.innerHTML = '';
-					}
-					if(this.editCell){
-						this.$refs.cell.appendChild(this.editCell.$el);
-					}else{
-						const component = new Vue({
-							functional: true,
-							template:this.column.editRender(this.row, this.column)					
-						});
-						component.row = this.row;
-                        component.column = this.column;
-						this.editCell = component.$mount();
-						this.$refs.cell.appendChild(this.editCell.$el);
-					}
-					if(this.editCell._vnode.componentInstance && this.editCell._vnode.componentInstance.focus){
-						const g=this;
-						this.$nextTick(()=>{
-							g.editCell._vnode.componentInstance.focus();
-							
-						});
-					}
+					this.$nextTick(()=>{
+						if(this.renderCell){
+							this.$refs.renderContainer.innerHTML = '';
+						}
+						if(this.editCell){
+							this.$refs.renderContainer.appendChild(this.editCell.$el);
+						}else{
+							const component = new Vue({
+								functional: true,
+								template:this.column.editRender(this.row, this.column)					
+							});
+							component.row = this.row;
+							component.column = this.column;
+							this.editCell = component.$mount();
+							this.$refs.renderContainer.appendChild(this.editCell.$el);
+						}
+						if(this.editCell._vnode.componentInstance && this.editCell._vnode.componentInstance.focus){
+							const g=this;
+							this.$nextTick(()=>{
+								g.editCell._vnode.componentInstance.focus();
+								
+							});
+						}		
+					});
 				}
 			},
 			handleHide(){
-				if(this.$refs.cell && this.editCell && this.oldRenderType && this.renderType === 'edit'){
+				if(this.$refs.renderContainer && this.editCell && this.oldRenderType && this.renderType === 'edit'){
 					this.renderType = this.oldRenderType;
 					this.oldRenderType = null;
 					if(this.editCell){
-						this.$refs.cell.innerHTML = '';
+						this.$refs.renderContainer.innerHTML = '';
 					}
 					if(this.renderCell){						
-						this.$refs.cell.appendChild(this.renderCell.$el);
+						this.$refs.renderContainer.appendChild(this.renderCell);
 					}
 				}
 			}
