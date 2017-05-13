@@ -9,7 +9,7 @@
                 <Icon type="ios-close-empty" @click.native.stop="removeTag(index)"></Icon>
             </div>
             <span :class="[prefixCls + '-placeholder']" v-show="showPlaceholder && !filterable">{{ localePlaceholder }}</span>
-            <span :class="[prefixCls + '-selected-value']" v-show="!showPlaceholder && !multiple && !filterable" v-text="selectedSingle"></span>
+            <span :class="[prefixCls + '-selected-value']" v-show="!showPlaceholder && !multiple && !filterable">{{ selectedSingle }}</span>
             <input
                 type="text"
                 v-if="filterable"
@@ -25,12 +25,9 @@
             <Icon type="arrow-down-b" :class="[prefixCls + '-arrow']" v-if="!remote"></Icon>
         </div>
         <transition :name="transitionName">
-            <Drop v-show="(visible && options.length) ||
-                (visible && !options.length && loading) ||
-                (visible && remote && !loading && !options.length && query !== '')" :placement="placement" ref="dropdown">
-            <!--<Drop v-show="visible" :placement="placement" ref="dropdown">-->
-                <ul v-show="(notFound && !remote) || (remote && !loading && !options.length)" :class="[prefixCls + '-not-found']"><li>{{ localeNotFoundText }}</li></ul>
-                <ul v-show="(!notFound && !remote) || (remote && !loading && !notFound)" :class="[prefixCls + '-dropdown-list']" ref="options"><slot></slot></ul>
+            <Drop v-show="dropVisible" :placement="placement" ref="dropdown">
+                <ul v-show="notFountShow" :class="[prefixCls + '-not-found']"><li>{{ localeNotFoundText }}</li></ul>
+                <ul v-show="(!notFound && !remote) || (remote && !loading && !notFound)" :class="[prefixCls + '-dropdown-list']"><slot></slot></ul>
                 <ul v-show="loading" :class="[prefixCls + '-loading']">{{ localeLoadingText }}</ul>
             </Drop>
         </transition>
@@ -196,6 +193,16 @@
             },
             transitionName () {
                 return this.placement === 'bottom' ? 'slide-up' : 'slide-down';
+            },
+            dropVisible () {
+                let status = true;
+                const options = this.$slots.default || [];
+                if (!this.loading && this.remote && this.query === '' && !options.length) status = false;
+                return this.visible && status;
+            },
+            notFountShow () {
+                const options = this.$slots.default || [];
+                return (this.notFound && !this.remote) || (this.remote && !this.loading && !options.length);
             }
         },
         methods: {
@@ -203,7 +210,6 @@
                 if (this.disabled) {
                     return false;
                 }
-
                 this.visible = !this.visible;
             },
             hideMenu () {
@@ -213,19 +219,15 @@
             },
             // find option component
             findChild (cb) {
-                const _this = this;
                 const find = function (child) {
                     const name = child.$options.componentName;
 
                     if (name) {
                         cb(child);
                     } else if (child.$children.length) {
-						//ע��nextTick Ӱ�����Ĭ��ֵѡ�� 20170507
-                        //_this.$nextTick(() => {
-                            child.$children.forEach((innerChild) => {
-                                find(innerChild, cb);
-                            });
-                        //})
+                        child.$children.forEach((innerChild) => {
+                            find(innerChild, cb);
+                        });
                     }
                 };
 
@@ -256,6 +258,7 @@
                 });
 
                 this.options = options;
+
                 if (init) {
                     if (!this.remote) {
                         this.updateSingleSelected(true, slot);
@@ -265,9 +268,10 @@
             },
             updateSingleSelected (init = false, slot = false) {
                 const type = typeof this.model;
-				
+
                 if (type === 'string' || type === 'number') {
                     let findModel = false;
+
                     for (let i = 0; i < this.options.length; i++) {
                         if (this.model === this.options[i].value) {
                             this.selectedSingle = this.options[i].label;
@@ -298,7 +302,8 @@
             },
             updateMultipleSelected (init = false, slot = false) {
                 if (this.multiple && Array.isArray(this.model)) {
-                    let selected = [];
+                    // todo 这里的 label 有问题，另删除字符时也有问题
+                    let selected = this.remote ? this.selectedMultiple : [];
 
                     for (let i = 0; i < this.model.length; i++) {
                         const model = this.model[i];
@@ -315,7 +320,16 @@
                         }
                     }
 
-                    this.selectedMultiple = selected;
+                    const selectedArray = [];
+                    const selectedObject = {};
+                    selected.forEach(item => {
+                        if (!selectedObject[item.value]) {
+                            selectedArray.push(item);
+                            selectedObject[item.value] = 1;
+                        }
+                    });
+
+                    this.selectedMultiple = this.remote ? selectedArray : selected;
 
                     if (slot) {
                         let selectedModel = [];
@@ -338,6 +352,12 @@
                 if (this.disabled) {
                     return false;
                 }
+
+                if (this.remote) {
+                    const tag = this.model[index];
+                    this.selectedMultiple = this.selectedMultiple.filter(item => item.value !== tag);
+                }
+
                 this.model.splice(index, 1);
 
                 if (this.filterable && this.visible) {
@@ -508,6 +528,12 @@
                                     this.query = child.label === undefined ? child.searchLabel : child.label;
                                 }
                             });
+                            // 如果删除了搜索词，下拉列表也情况了，所以强制调用一次remoteMethod
+                            if (this.remote) {
+                                this.$nextTick(() => {
+                                    this.query = model;
+                                });
+                            }
                         } else {
                             this.query = '';
                         }
@@ -570,6 +596,10 @@
                     this.$nextTick(() => {
                         this.broadcastQuery('');
                     });
+                } else {
+                    this.findChild(child => {
+                        child.selected = this.multiple ? this.model.indexOf(child.value) > -1 : this.model === child.value;
+                    });
                 }
                 this.slotChange();
                 this.updateOptions(true, true);
@@ -579,6 +609,10 @@
                     this.modelToQuery();
                     this.$nextTick(() => {
                         this.broadcastQuery('');
+                    });
+                } else {
+                    this.findChild(child => {
+                        child.selected = this.multiple ? this.model.indexOf(child.value) > -1 : this.model === child.value;
                     });
                 }
                 this.slotChange();
@@ -599,7 +633,8 @@
                         }
 
                         if (this.filterable) {
-                            this.selectToChangeQuery = true;
+                            // remote&filterable&multiple时，一次点多项，不应该设置true，因为无法置为false，下次的搜索会失效
+                            if (this.query !== '') this.selectToChangeQuery = true;
                             this.query = '';
                             this.$refs.input.focus();
                         }
@@ -609,7 +644,7 @@
                         if (this.filterable) {
                             this.findChild((child) => {
                                 if (child.value === value) {
-                                    this.selectToChangeQuery = true;
+                                    if (this.query !== '') this.selectToChangeQuery = true;
                                     this.query = child.label === undefined ? child.searchLabel : child.label;
                                 }
                             });
@@ -647,6 +682,11 @@
                         } else {
                             this.$refs.input.select();
                         }
+                        if (this.remote) {
+                            this.findChild(child => {
+                                child.selected = this.multiple ? this.model.indexOf(child.value) > -1 : this.model === child.value;
+                            });
+                        }
                     }
                     this.broadcast('Drop', 'on-update-popper');
                 } else {
@@ -666,6 +706,10 @@
                         this.$emit('on-query-change', val);
                         this.remoteMethod(val);
                     }
+                    this.focusIndex = 0;
+                    this.findChild(child => {
+                        child.isFocus = false;
+                    });
                 } else {
                     if (!this.selectToChangeQuery) {
                         this.$emit('on-query-change', val);
