@@ -129,10 +129,12 @@
             },
             destroy () {
 				if(this.renderCell){
-					this.renderCell.destroy();
+					this.renderCell.$destroy();
+					this.renderCell=null;
 				}
 				if(this.editCell){
-					this.editCell.destroy();
+					this.editCell.$destroy();
+					this.editCell=null;
 				}
             },
             toggleSelect () {
