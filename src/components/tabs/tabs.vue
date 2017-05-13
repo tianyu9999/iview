@@ -1,12 +1,12 @@
 <template>
     <div :class="classes">
-        <div :class="[prefixCls + '-bar']">
+        <div :class="[prefixCls + '-bar']" >
             <div :class="[prefixCls + '-nav-container']">
                 <div :class="[prefixCls + '-nav-wrap']">
-                    <div :class="[prefixCls + '-nav-scroll']">
+                    <div :class="[prefixCls + '-nav-scroll']" >
                         <div :class="[prefixCls + '-nav']" ref="nav">
                             <div :class="barClasses" :style="barStyle"></div>
-                            <div :class="tabCls(item)" v-for="(item, index) in navList" @click="handleChange(index)">
+                            <div :class="tabCls(item)" v-for="(item, index) in navList" @click="handleChange(index)" @contextmenu="stopRight($event)"  @mousedown="showMenu($event,item,index)">
                                 <Icon v-if="item.icon !== ''" :type="item.icon"></Icon>
                                 {{ item.label }}
                                 <Icon v-if="showClose(item)" type="ios-close-empty" @click.native.stop="handleRemove(index)"></Icon>
@@ -18,12 +18,23 @@
             </div>
         </div>
         <div :class="contentClasses" :style="contentStyle"><slot></slot></div>
+		<div v-if="showRightMenu" ref="rightMenu"  :style="{top:rightPosition.y+'px',left:rightPosition.x+'px',position:'absolute'}" v-clickoutside="handleHide">
+			<Menu  mode="vertical" @on-select="menuSelect" width="140">
+				<Menu-item name="closeother">
+					关闭其它页
+				</Menu-item>
+				<Menu-item name="closeall">
+					关闭所有页
+				</Menu-item>
+			</Menu>
+		</div>
     </div>
 </template>
 <script>
     import Icon from '../icon/icon.vue';
     import { oneOf, getStyle } from '../../utils/assist';
     import Emitter from '../../mixins/emitter';
+	import clickoutside from '../../directives/clickoutside';
 
     const prefixCls = 'ivu-tabs';
 
@@ -31,6 +42,7 @@
         name: 'Tabs',
         mixins: [ Emitter ],
         components: { Icon },
+		directives: { clickoutside },
         props: {
             value: {
                 type: [String, Number]
@@ -63,7 +75,11 @@
                 barWidth: 0,
                 barOffset: 0,
                 activeKey: this.value,
-                showSlot: false
+                showSlot: false,
+				showRightMenu:false,
+				rightTab:null,
+				rightPosition:{},
+				rightTarget:null
             };
         },
         computed: {
@@ -219,7 +235,61 @@
                 } else {
                     return false;
                 }
-            }
+            },
+			stopRight (evt){
+				if(window.event){
+					window.event.returnvalue=false;
+				}
+				evt.preventDefault();
+				return false;
+			},
+			showMenu(evt,item,index){
+				if(evt.button==2){
+					this.rightTab=null;
+					if(this.showClose(item)){
+						this.stopRight(evt);
+						this.rightTab=item;
+						this.rightTarget=evt.target;
+						
+						const p={x:this.rightTarget.offsetLeft+evt.offsetX+5,y:evt.offsetY+2};
+						
+						this.rightPosition=p;
+						this.showRightMenu=true;
+						return false;
+					}
+				}
+			},
+			handleHide(e){
+				if(this.showRightMenu && e.target!=this.rightTarget){
+					this.rightTab=null;
+					this.rightPosition={};
+					this.rightTarget=null;
+					this.showRightMenu=false;
+				}
+			},
+			menuSelect(menuName){
+				var nvs=this.navList;
+				for(var i=0;i<nvs.length;i++){
+					const itm=nvs[i];
+					if(this.rightTab===itm){
+						if(menuName==='closeall' && this.closable && (itm.closable==null || (itm.closable!=null && itm.closable))){
+							this.handleRemove(i);
+							i=0;
+							nvs=this.navList;	
+						}
+					}else{
+						if(this.closable && (itm.closable==null || (itm.closable!=null && itm.closable))){
+							this.handleRemove(i);
+							i=0;
+							nvs=this.navList;	
+						}
+					}								
+				}
+				this.rightTab=null;
+				this.rightTarget=null;
+				this.rightPosition={};
+				this.showRightMenu=false;
+			}
         },
         watch: {
             value (val) {
