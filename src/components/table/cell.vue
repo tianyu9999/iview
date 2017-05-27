@@ -16,6 +16,7 @@
 <script>
     import Vue from 'vue';
     import Checkbox from '../checkbox/checkbox.vue';
+	import clickoutside from '../../directives/clickoutside';
     import { findComponentUpward } from '../../utils/assist';
 
     export default {
@@ -75,15 +76,16 @@
                     if (Table.context) isRealRender = false;
 
                     if (isRealRender) {
-                        this.$el.innerHTML = '';
+						//去掉非清空内容
+                        //this.$el.innerHTML = '';
                         const component = new Vue({
                             functional: true,
                             render: (h) => {
-                                return this.column.render(h, {
-                                    row: this.row,
-                                    column: this.column,
-                                    index: this.index
-                                });
+                                return this.column.render(h, 
+                                   this.row,
+                                    this.column,
+                                    this.index
+                                );
                             }
                         });
 						component.row = this.row;
