@@ -107,7 +107,7 @@
                     {
                         [`${prefixCls}-arrow-disabled`]: this.data.disabled,
                         [`${prefixCls}-arrow-open`]: this.data.expand,
-                        [`${prefixCls}-arrow-hidden`]: !(this.data.children && this.data.children.length)
+                        [`${prefixCls}-arrow-hidden`]: !(this.data.children)
                     }
                 ];
             },
