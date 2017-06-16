@@ -7,6 +7,7 @@
     const prefixCls = 'ivu-transfer';
 
     export default {
+        name: 'Transfer',
         mixins: [ Emitter, Locale ],
         render (createElement) {
 
@@ -193,14 +194,14 @@
                 this.rightData = [];
                 if (this.targetKeys.length > 0) {
                     this.targetKeys.forEach((targetKey) => {
-                        this.rightData.push(
-                                this.leftData.filter((data, index) => {
-                                    if (data.key === targetKey) {
-                                        this.leftData.splice(index, 1);
-                                        return true;
-                                    }
-                                    return false;
-                                })[0]);
+                        const filteredData = this.leftData.filter((data, index) => {
+                            if (data.key === targetKey) {
+                                this.leftData.splice(index, 1);
+                                return true;
+                            }
+                            return false;
+                        });
+                        if (filteredData && filteredData.length > 0) this.rightData.push(filteredData[0]);
                     });
                 }
                 if (init) {
