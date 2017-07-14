@@ -705,8 +705,8 @@
             this.handleResize();
             this.fixedHeader();
             this.$nextTick(() => this.ready = true);
-			this.single();
-            window.addEventListener('resize', this.handleResize, false);
+//            window.addEventListener('resize', this.handleResize, false);
+            on(window, 'resize', this.handleResize);
             this.$on('on-visible-change', (val) => {
                 if (val) {
                     this.handleResize();
@@ -715,7 +715,8 @@
             });
         },
         beforeDestroy () {
-            window.removeEventListener('resize', this.handleResize, false);
+//            window.removeEventListener('resize', this.handleResize, false);
+            off(window, 'resize', this.handleResize);
         },
         watch: {
             data: {

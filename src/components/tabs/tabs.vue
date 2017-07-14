@@ -1,14 +1,15 @@
 <template>
     <div :class="classes">
-        <div :class="[prefixCls + '-bar']" >
+        <div :class="[prefixCls + '-bar']">
             <div :class="[prefixCls + '-nav-container']">
                 <div :class="[prefixCls + '-nav-wrap']">
-                    <div :class="[prefixCls + '-nav-scroll']" >
+                    <div :class="[prefixCls + '-nav-scroll']">
                         <div :class="[prefixCls + '-nav']" ref="nav">
                             <div :class="barClasses" :style="barStyle"></div>
                             <div :class="tabCls(item)" v-for="(item, index) in navList" @click="handleChange(index)" @contextmenu="stopRight($event)"  @mousedown="showMenu($event,item,index)">
                                 <Icon v-if="item.icon !== ''" :type="item.icon"></Icon>
-                                {{ item.label }}
+                                <Render v-if="item.labelType === 'function'" :render="item.label"></Render>
+                                <template v-else>{{ item.label }}</template>
                                 <Icon v-if="showClose(item)" type="ios-close-empty" @click.native.stop="handleRemove(index)"></Icon>
                             </div>
                         </div>
@@ -32,6 +33,7 @@
 </template>
 <script>
     import Icon from '../icon/icon.vue';
+    import Render from '../base/render';
     import { oneOf, getStyle } from '../../utils/assist';
     import Emitter from '../../mixins/emitter';
 	import clickoutside from '../../directives/clickoutside';
@@ -41,7 +43,7 @@
     export default {
         name: 'Tabs',
         mixins: [ Emitter ],
-        components: { Icon },
+        components: { Icon, Render  },
 		directives: { clickoutside },
         props: {
             value: {
@@ -144,6 +146,7 @@
                 this.navList = [];
                 this.getTabs().forEach((pane, index) => {
                     this.navList.push({
+                        labelType: typeof pane.label,
                         label: pane.label,
                         icon: pane.icon || '',
                         name: pane.currentName || index,

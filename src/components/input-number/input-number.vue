@@ -2,7 +2,7 @@
     <div :class="wrapClasses">
         <div :class="handlerClasses" @mouse.down="preventDefault" @click="preventDefault">
             <a
-                @click="up"               
+                @click="up"
                 :class="upClasses">
                 <span :class="innerUpClasses"></span>
             </a>
@@ -23,7 +23,8 @@
                 @keydown.stop="keyDown"
                 @change="change"
 				ref="textinput"
-                :value="currentValue">
+                :name="name"
+                :value="value">
         </div>
     </div>
 </template>
@@ -93,6 +94,9 @@
             autofocus: {
                 type: Boolean,
                 default: false
+            },
+            name: {
+                type: String
             }
         },
         data () {

@@ -5,17 +5,19 @@
 			<template v-if="renderType === 'selection'">
 				<Checkbox :value="checked" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
 			</template>
+			<template v-if="renderType === 'normal'"><span v-text="row[column.key]"></span></template>
 			<template v-if="renderType === 'radio'">
 				<radio v-model="radioCheck" @on-change="singleSelect" :disabled="disabled"></radio>
-			</template>
-			<template v-if="renderType === 'normal'"><span v-text="row[column.key]"></span></template>
-			<template v-if="renderType === 'render' || renderType==='edit'"><span ref="renderContainer"></span></template>
+			</template>			
+			<template v-if="renderType === 'render' || renderType==='edit'"><span ref="renderContainer"></span></template>	
 		</div>
 	</div>
 </template>
 <script>
     import Vue from 'vue';
+	import Cell from './expand';
     import Checkbox from '../checkbox/checkbox.vue';
+	import Icon from '../icon/icon.vue';
 	import clickoutside from '../../directives/clickoutside';
     import { findComponentUpward } from '../../utils/assist';
 
