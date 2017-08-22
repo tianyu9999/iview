@@ -1,30 +1,37 @@
 <template>
-	<div :class="classesCon" v-clickoutside="handleHide" @click="cellClickHandel">
-		<div :class="classes" ref="cell">
-			<template v-if="renderType === 'index'">{{naturalIndex + 1}}</template>
-			<template v-if="renderType === 'selection'">
-				<Checkbox :value="checked" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
-			</template>
-			<template v-if="renderType === 'normal'"><span v-text="row[column.key]"></span></template>
-			<template v-if="renderType === 'radio'">
+    <div :class="classes" ref="cell" v-clickoutside="handleHide" @click="cellClickHandel">
+        <template v-if="renderType === 'index'">{{naturalIndex + 1}}</template>
+        <template v-if="renderType === 'selection'">
+            <Checkbox :value="checked" @click.native.stop="handleClick" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
+        </template>
+        <template v-if="renderType === 'normal'"><span v-html="row[column.key]"></span></template>
+        <template v-if="renderType === 'expand' && !row._disableExpand">
+            <div :class="expandCls" @click="toggleExpand">
+                <Icon type="ios-arrow-right"></Icon>
+            </div>
+        </template>
+		<template v-if="renderType === 'radio'">
 				<radio v-model="radioCheck" @on-change="singleSelect" :disabled="disabled"></radio>
-			</template>			
-			<template v-if="renderType === 'render' || renderType==='edit'"><span ref="renderContainer"></span></template>	
-		</div>
-	</div>
+		</template>
+		<template v-if="renderType === 'editRender' || renderType==='edit'"><span ref="renderContainer"></span></template>	
+        <Cell
+            v-if="renderType === 'render'"
+            :row="row"
+            :column="column"
+            :index="index"
+            :render="column.render"></Cell>
+    </div>
 </template>
 <script>
-    import Vue from 'vue';
-	import Cell from './expand';
+    import Cell from './expand';
+    import Icon from '../icon/icon.vue';
     import Checkbox from '../checkbox/checkbox.vue';
-	import Icon from '../icon/icon.vue';
 	import clickoutside from '../../directives/clickoutside';
     import { findComponentUpward } from '../../utils/assist';
 
     export default {
         name: 'TableCell',
-        components: { Checkbox },	
-		directives: { clickoutside },		
+        components: { Icon, Checkbox, Cell },
         props: {
             prefixCls: String,
             row: Object,
@@ -33,6 +40,7 @@
             index: Number,           // _index of data
             checked: Boolean,
             disabled: Boolean,
+            expanded: Boolean,
             fixed: {
                 type: [Boolean, String],
                 default: false
@@ -42,7 +50,7 @@
             return {
                 renderType: '',
                 uid: -1,
-                context: this.$parent.$parent.currentContext,
+                context: this.$parent.$parent.$parent.currentContext,
 				oldRenderType:null,
 				renderCell:null,
 				editCell:null,
@@ -55,87 +63,22 @@
                     `${this.prefixCls}-cell`,
                     {
                         [`${this.prefixCls}-hidden`]: !this.fixed && this.column.fixed && (this.column.fixed === 'left' || this.column.fixed === 'right'),
-                        [`${this.prefixCls}-cell-ellipsis`]: this.column.ellipsis || false
+                        [`${this.prefixCls}-cell-ellipsis`]: this.column.ellipsis || false,
+                        [`${this.prefixCls}-cell-with-expand`]: this.renderType === 'expand'
                     }
                 ];
             },
-			classesCon () {
-				return [
-					`${this.prefixCls}-cell-container`,
-					{
-                        [`${this.prefixCls}-hidden`]: !this.fixed && this.column.fixed && (this.column.fixed === 'left' || this.column.fixed === 'right'),
-                        [`${this.prefixCls}-cell-ellipsis`]: this.column.ellipsis || false
+            expandCls () {
+                return [
+                    `${this.prefixCls}-cell-expand`,
+                    {
+                        [`${this.prefixCls}-cell-expand-expanded`]: this.expanded
                     }
-				];
-			}
+                ];
+            }
         },
         methods: {
-            compile () {
-                if (this.column.render) {
-                    // 兼容真 Render，后期废弃旧用法
-                    let isRealRender = true;
-                    const Table = findComponentUpward(this, 'Table');
-                    if (Table.context) isRealRender = false;
-
-                    if (isRealRender) {
-						//去掉非清空内容
-                        //this.$el.innerHTML = '';
-                        const component = new Vue({
-                            functional: true,
-                            render: (h) => {
-                                return this.column.render(h, 
-                                   this.row,
-                                    this.column,
-                                    this.index
-                                );
-                            }
-                        });
-						component.row = this.row;
-                        component.column = this.column;
-                        this.renderCell = component.$mount();
-                        this.$refs.renderContainer.appendChild(this.renderCell.$el);
-                    } else {
-                        const $parent = this.context;
-                        const template = this.column.render(this.row, this.column, this.index);
-                        const cell = document.createElement('div');
-                        cell.innerHTML = template;
-
-                        this.$refs.cell.innerHTML = '';
-                        let methods = {};
-                        Object.keys($parent).forEach(key => {
-                            const func = $parent[key];
-                            if (typeof(func) === 'function' && (func.name  === 'boundFn' || func.name === 'n')) {
-                                methods[key] = func;
-                            }
-                        });
-                        const res = Vue.compile(cell.outerHTML);
-                        // 获取父组件使用的局部 component
-                        const components = {};
-                        Object.getOwnPropertyNames($parent.$options.components).forEach(item => {
-                            components[item] = $parent.$options.components[item];
-                        });
-
-                        const component = new Vue({
-                            render: res.render,
-                            staticRenderFns: res.staticRenderFns,
-                            methods: methods,
-                            data () {
-                                return $parent._data;
-                            },
-                            components: components
-                        });
-                        if ($parent.$store != undefined) {
-                            component.$store = $parent.$store;
-                        }
-                        component.row = this.row;
-                        component.column = this.column;
-
-                        this.renderCell = component.$mount();
-                        this.$refs.renderContainer.appendChild(this.renderCell.$el);
-                    }
-                }
-            },
-            destroy () {
+		    destroy () {
 				if(this.renderCell){
 					this.renderCell.$destroy();
 					this.renderCell=null;
@@ -146,7 +89,13 @@
 				}
             },
             toggleSelect () {
-                this.$parent.$parent.toggleSelect(this.index);
+                this.$parent.$parent.$parent.toggleSelect(this.index);
+            },
+            toggleExpand () {
+                this.$parent.$parent.$parent.toggleExpand(this.index);
+            },
+            handleClick () {
+                // 放置 Checkbox 冒泡
             },
 			singleSelect () {
 				 this.$parent.$parent.singleSelect(this.index);
@@ -202,27 +151,22 @@
                 this.renderType = 'index';
             } else if (this.column.type === 'selection') {
                 this.renderType = 'selection';
-            } else if (this.column.render) {
+            } else if (this.column.type === 'expand') {
+                this.renderType = 'expand';
+            } else if (this.column.type==='render') {
                 this.renderType = 'render';
-            } else if(this.column.type === 'radio'){
+            }else if(this.column.type === 'radio'){
 				this.renderType = 'radio';
-			}else {
+			}else if(this.column.type==='editRender'){
+				this.renderType = 'editRender';
+			} else {
                 this.renderType = 'normal';
             }
         },
-        mounted () {
-            this.$nextTick(() => {
-                this.compile();
-            });
-        },
-        beforeDestroy () {
+		beforeDestroy () {
             this.destroy();
         },
-        watch: {
-            naturalIndex () {
-                this.destroy();
-                this.compile();
-            },
+		watch: {
 			checked (val) {
 				this.radioCheck = val;
 			}

@@ -37,14 +37,14 @@
                 </table>
             </div>
             <div :class="[prefixCls + '-fixed']" :style="fixedTableStyle" v-if="isLeftFixed">
-                <div :class="[prefixCls + '-fixed-header']" v-if="showHeader">
+                <div :class="fixedHeaderClasses" v-if="showHeader">
                     <table-head
                         fixed="left"
                         :prefix-cls="prefixCls"
                         :styleObject="fixedTableStyle"
                         :columns="leftFixedColumns"
                         :obj-data="objData"
-                        :columns-width.sync="columnsWidth"
+                        :columns-width="columnsWidth"
                         :data="rebuildData"></table-head>
                 </div>
                 <div :class="[prefixCls + '-fixed-body']" :style="fixedBodyStyle" ref="fixedBody">
@@ -59,7 +59,7 @@
                 </div>
             </div>
             <div :class="[prefixCls + '-fixed-right']" :style="fixedRightTableStyle" v-if="isRightFixed">
-                <div :class="[prefixCls + '-fixed-header']" v-if="showHeader">
+                <div :class="fixedHeaderClasses" v-if="showHeader">
                     <table-head
                         fixed="right"
                         :prefix-cls="prefixCls"
@@ -88,11 +88,15 @@
     import tableHead from './table-head.vue';
     import tableBody from './table-body.vue';
     import { oneOf, getStyle, deepCopy, getScrollBarSize } from '../../utils/assist';
+    import { on, off } from '../../utils/dom';
     import Csv from '../../utils/csv';
     import ExportCsv from './export-csv';
     import Locale from '../../mixins/locale';
 
     const prefixCls = 'ivu-table';
+
+    let rowKey = 1;
+    let columnKey = 1;
 
     export default {
         name: 'Table',
@@ -152,6 +156,9 @@
             },
             noFilteredDataText: {
                 type: String
+            },
+            disabledHover: {
+                type: Boolean
             }
         },
         data () {
@@ -207,6 +214,14 @@
                         [`${prefixCls}-border`]: this.border,
                         [`${prefixCls}-stripe`]: this.stripe,
                         [`${prefixCls}-with-fixed-top`]: !!this.height
+                    }
+                ];
+            },
+            fixedHeaderClasses () {
+                return [
+                    `${prefixCls}-fixed-header`,
+                    {
+                        [`${prefixCls}-fixed-header-with-empty`]: !this.rebuildData.length
                     }
                 ];
             },
@@ -353,10 +368,12 @@
                 });
             },
             handleMouseIn (_index) {
+                if (this.disabledHover) return;
                 if (this.objData[_index]._isHover) return;
                 this.objData[_index]._isHover = true;
             },
             handleMouseOut (_index) {
+                if (this.disabledHover) return;
                 this.objData[_index]._isHover = false;
             },
             highlightCurrentRow (_index) {
@@ -385,40 +402,40 @@
                 this.$emit('on-row-dblclick', this.objData[_index]);
             },
             getSelection () {
-                let selection = [];
+                let selectionIndexes = [];
                 for (let i in this.objData) {
-                    if (this.objData[i]._isChecked) selection.push(this.objData[i]);
+                    if (this.objData[i]._isChecked) selectionIndexes.push(parseInt(i));
                 }
-                return selection;
+                return this.data.filter((data, index) => selectionIndexes.indexOf(index) > -1);
             },
             toggleSelect (_index) {
-                let data = this.objData[_index+''];
-				
+                let data = {};
+
+                for (let i in this.objData) {
+                    if (parseInt(i) === _index) {
+                        data = this.objData[i];
+                    }
+                }
                 const status = !data._isChecked;
 
                 this.objData[_index]._isChecked = status;
 
                 const selection = this.getSelection();
-                if (status) {
-                    this.$emit('on-select', selection, this.data);
-                }
+                this.$emit(status ? 'on-select' : 'on-select-cancel', selection, JSON.parse(JSON.stringify(this.data[_index])));
                 this.$emit('on-selection-change', selection);
             },
-			singleSelect (_index) {
-				let data = this.objData[_index+''];
-				
-                const status = !data._isChecked;
+            toggleExpand (_index) {
+                let data = {};
 
-                this.objData[_index]._isChecked = status;
-				
-				if(status){
-					for (let i in this.objData) {
-						if (this.objData[i] != data && this.objData[i]._isChecked) {
-							this.objData[i]._isChecked = false;
-						}
-					}
-				}
-			},
+                for (let i in this.objData) {
+                    if (parseInt(i) === _index) {
+                        data = this.objData[i];
+                    }
+                }
+                const status = !data._isExpanded;
+                this.objData[_index]._isExpanded = status;
+                this.$emit('on-expand', this.objData[_index], status);
+            },
             selectAll (status) {
                 // this.rebuildData.forEach((data) => {
                 //     if(this.objData[data._index]._isDisabled){
@@ -610,6 +627,11 @@
                     } else {
                         newRow._isChecked = false;
                     }
+                    if (newRow._expanded) {
+                        newRow._isExpanded = newRow._expanded;
+                    } else {
+                        newRow._isExpanded = false;
+                    }
                     if (newRow._highlight) {
                         newRow._isHighlight = newRow._highlight;
                     } else {
@@ -617,6 +639,7 @@
                     }
 					newRow.item = row;
 					newRow._index = index;
+					row._rowKey = rowKey++;
                     data[index] = newRow;
                 });
                 return data;
@@ -629,6 +652,7 @@
 				const g = this;
                 columns.forEach((column, index) => {
                     column._index = index;
+                    column._columnKey = columnKey++;
                     column._width = column.width ? column.width : '';    // update in handleResize()
                     column._sortType = 'normal';
                     column._filterVisible = false;
@@ -643,6 +667,10 @@
                     if ('filteredValue' in column) {
                         column._filterChecked = column.filteredValue;
                         column._isFiltered = true;
+                    }
+
+                    if ('sortType' in column) {
+                        column._sortType = column.sortType;
                     }
 
                     if (column.fixed && column.fixed === 'left') {
@@ -723,9 +751,13 @@
 			    //添加立即模式 20170507
 				immediate: true,
                 handler (val) {
+                    const oldDataLen = this.rebuildData.length;
                     this.objData = this.makeObjData();
                     this.rebuildData = this.makeDataWithSortAndFilter();
                     this.handleResize();
+                    if (!oldDataLen) {
+                        this.fixedHeader();
+                    }
                     // here will trigger before clickCurrentRow, so use async
                     setTimeout(() => {
                         this.cloneData = deepCopy(this.data);

@@ -181,7 +181,15 @@ const router = new VueRouter({
             path: '/notice',
             component: require('./routers/notice.vue')
         },
-		 {
+        {
+            path: '/avatar',
+            component: require('./routers/avatar.vue')
+        },
+        {
+            path: '/color-picker',
+            component: require('./routers/color-picker.vue')
+        },
+	 {
             path: '/tableEdit',
             component: require('./routers/tableEdit.vue')
         }
