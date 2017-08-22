@@ -4,7 +4,7 @@
         <template v-if="renderType === 'selection'">
             <Checkbox :value="checked" @click.native.stop="handleClick" @on-change="toggleSelect" :disabled="disabled"></Checkbox>
         </template>
-        <template v-if="renderType === 'normal'"><span v-html="row[column.key]"></span></template>
+        <template v-if="renderType === 'normal'"><span v-html="row.item[column.key]"></span></template>
         <template v-if="renderType === 'expand' && !row._disableExpand">
             <div :class="expandCls" @click="toggleExpand">
                 <Icon type="ios-arrow-right"></Icon>
@@ -23,6 +23,7 @@
     </div>
 </template>
 <script>
+     import Vue from 'vue';
     import Cell from './expand';
     import Icon from '../icon/icon.vue';
     import Checkbox from '../checkbox/checkbox.vue';
@@ -32,6 +33,7 @@
     export default {
         name: 'TableCell',
         components: { Icon, Checkbox, Cell },
+		directives: { clickoutside },
         props: {
             prefixCls: String,
             row: Object,
@@ -98,7 +100,7 @@
                 // 放置 Checkbox 冒泡
             },
 			singleSelect () {
-				 this.$parent.$parent.singleSelect(this.index);
+				 this.$parent.$parent.$parent.singleSelect(this.index);
 			},
 			cellClickHandel(){
 				if(this.renderType === 'edit'){
@@ -116,9 +118,9 @@
 						}else{
 							const component = new Vue({
 								functional: true,
-								template:this.column.editRender(this.row, this.column)					
+								template:this.column.editRender(this.row.item, this.column)					
 							});
-							component.row = this.row;
+							component.row = this.row.item;
 							component.column = this.column;
 							this.editCell = component.$mount();
 							this.$refs.renderContainer.appendChild(this.editCell.$el);

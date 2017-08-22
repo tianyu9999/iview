@@ -436,6 +436,21 @@
                 this.objData[_index]._isExpanded = status;
                 this.$emit('on-expand', this.objData[_index], status);
             },
+			singleSelect (_index) {
+				let data = this.objData[_index+''];
+				
+                const status = !data._isChecked;
+
+                this.objData[_index]._isChecked = status;
+				
+				if(status){
+					for (let i in this.objData) {
+						if (this.objData[i] != data && this.objData[i]._isChecked) {
+							this.objData[i]._isChecked = false;
+						}
+					}
+				}
+			},
             selectAll (status) {
                 // this.rebuildData.forEach((data) => {
                 //     if(this.objData[data._index]._isDisabled){
