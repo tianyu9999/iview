@@ -14,6 +14,7 @@
         </div>
         <div :class="inputWrapClasses">
             <input
+	    	ref="textinput"
                 :class="inputClasses"
                 :disabled="disabled"
                 autocomplete="off"
@@ -22,9 +23,8 @@
                 @blur="blur"
                 @keydown.stop="keyDown"
                 @change="change"
-				ref="textinput"
                 :name="name"
-                :value="value">
+                :value="currentValue">
         </div>
     </div>
 </template>

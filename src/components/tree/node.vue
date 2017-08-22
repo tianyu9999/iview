@@ -1,5 +1,5 @@
 <template>
-    <transition name="slide-up">
+    <collapse-transition>
         <ul :class="classes" v-show="visible">
             <li>
                 <span :class="arrowClasses" @click="handleExpand">
@@ -15,21 +15,22 @@
 					<node-content :data="data"></node-content>
 				</span>		
                 <Tree-node
-                    v-for="item in data.children"
-                    :key="item"
-                    :data="item"
-                    :visible="data.expand"
-                    :multiple="multiple"
-					:render-content="renderContent"
-                    :show-checkbox="showCheckbox">
+		       :render-content="renderContent"
+                        v-for="item in data.children"
+                        :key="item.nodeKey"
+                        :data="item"
+                        :visible="data.expand"
+                        :multiple="multiple"
+                        :show-checkbox="showCheckbox">
                 </Tree-node>
             </li>
         </ul>
-    </transition>
+    </collapse-transition>
 </template>
 <script>
     import Checkbox from '../checkbox/checkbox.vue';
     import Icon from '../icon/icon.vue';
+    import CollapseTransition from '../base/collapse-transition';
     import Emitter from '../../mixins/emitter';
     import { findComponentsDownward } from '../../utils/assist';
 
@@ -38,7 +39,7 @@
     export default {
         name: 'TreeNode',
         mixins: [ Emitter ],
-        components: { Checkbox, Icon,   
+        components: { Checkbox, Icon,CollapseTransition,   
 			//ÃÌº”Ω⁄µ„‰÷»æ 20170507
 			NodeContent: {
 				props: {
@@ -107,7 +108,7 @@
                     {
                         [`${prefixCls}-arrow-disabled`]: this.data.disabled,
                         [`${prefixCls}-arrow-open`]: this.data.expand,
-                        [`${prefixCls}-arrow-hidden`]: !(this.data.children)
+                        [`${prefixCls}-arrow-hidden`]: !(this.data.children && this.data.children.length)
                     }
                 ];
             },
