@@ -16,6 +16,12 @@ export default {
             index: ctx.props.index
         };
         if (ctx.props.column) params.column = ctx.props.column;
-        return ctx.props.render(h, params);
+		let hh;
+		try{
+			hh=ctx.props.render(h,params.row.item,params.column,params.index);
+		}catch(e){
+			hh=ctx.props.render(h, params);
+		}
+        return hh;
     }
 };
