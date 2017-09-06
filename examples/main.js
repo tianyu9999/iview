@@ -192,6 +192,10 @@ const router = new VueRouter({
 	 {
             path: '/tableEdit',
             component: require('./routers/tableEdit.vue')
+        },
+        {
+            path: '/auto-complete',
+            component: require('./routers/auto-complete.vue')
         }
     ]
 });
