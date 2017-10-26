@@ -92,6 +92,7 @@
     import Csv from '../../utils/csv';
     import ExportCsv from './export-csv';
     import Locale from '../../mixins/locale';
+    import elementResizeDetectorMaker from 'element-resize-detector';
 
     const prefixCls = 'ivu-table';
 
@@ -333,7 +334,7 @@
                 this.$nextTick(() => {
                     const allWidth = !this.columns.some(cell => !cell.width);    // each column set a width
                     if (allWidth) {
-                        this.tableWidth = this.columns.map(cell => cell.width).reduce((a, b) => a + b);
+                        this.tableWidth = this.columns.map(cell => cell.width).reduce((a, b) => a + b, 0);
                     } else {
                         this.tableWidth = parseInt(getStyle(this.$el, 'width')) - 1;
                     }
@@ -344,7 +345,7 @@
                         if (allWidth) autoWidthIndex = this.cloneColumns.findIndex(cell => !cell.width);//todo 这行可能有问题
 
                         if (this.data.length) {
-                            const $td = this.$refs.tbody.$el.querySelectorAll('tbody tr')[0].querySelectorAll('td');
+                            const $td = this.$refs.tbody.$el.querySelectorAll('tbody tr')[0].children;
                             for (let i = 0; i < $td.length; i++) {    // can not use forEach in Firefox
                                 const column = this.cloneColumns[i];
 
@@ -376,9 +377,8 @@
                 if (this.disabledHover) return;
                 this.objData[_index]._isHover = false;
             },
-            highlightCurrentRow (_index) {
-                if (!this.highlightRow || this.objData[_index]._isHighlight) return;
-
+            // 通用处理 highlightCurrentRow 和 clearCurrentRow
+            handleCurrentRow (type, _index) {
                 let oldIndex = -1;
                 for (let i in this.objData) {
                     if (this.objData[i]._isHighlight) {
@@ -386,9 +386,18 @@
                         this.objData[i]._isHighlight = false;
                     }
                 }
-                this.objData[_index]._isHighlight = true;
+                if (type === 'highlight') this.objData[_index]._isHighlight = true;
                 const oldData = oldIndex < 0 ? null : this.objData[oldIndex];
-                this.$emit('on-current-change', this.objData[_index], oldData);
+                const newData = type === 'highlight' ? this.objData[_index] : null;
+                this.$emit('on-current-change', newData, oldData);
+            },
+            highlightCurrentRow (_index) {
+                if (!this.highlightRow || this.objData[_index]._isHighlight) return;
+                this.handleCurrentRow('highlight', _index);
+            },
+            clearCurrentRow () {
+                if (!this.highlightRow) return;
+                this.handleCurrentRow('clear');
             },
             clickCurrentRow (_index) {
                 this.highlightCurrentRow (_index);
@@ -748,8 +757,11 @@
             this.handleResize();
             this.fixedHeader();
             this.$nextTick(() => this.ready = true);
-//            window.addEventListener('resize', this.handleResize, false);
+
             on(window, 'resize', this.handleResize);
+            this.observer = elementResizeDetectorMaker();
+            this.observer.listenTo(this.$el, this.handleResize);
+
             this.$on('on-visible-change', (val) => {
                 if (val) {
                     this.handleResize();
@@ -758,8 +770,8 @@
             });
         },
         beforeDestroy () {
-//            window.removeEventListener('resize', this.handleResize, false);
             off(window, 'resize', this.handleResize);
+            this.observer.removeListener(this.$el, this.handleResize);
         },
         watch: {
             data: {

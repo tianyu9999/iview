@@ -1,63 +1,21 @@
-import Vue from 'vue';
-import { on } from './dom';
-
-const nodeList = [];
-const ctx = '@@clickoutsideContext';
-
-let startClick;
-
-!Vue.prototype.$isServer && on(document, 'mousedown', e => (startClick = e));
-
-!Vue.prototype.$isServer && on(document, 'mouseup', e => {
-  nodeList.forEach(node => node[ctx].documentHandler(e, startClick));
-});
-/**
- * v-clickoutside
- * @desc 点击元素外面才会触发的事件
- * @example
- * ```vue
- * <div v-element-clickoutside="handleClose">
- * ```
- */
 export default {
-  bind(el, binding, vnode) {
-    const id = nodeList.push(el) - 1;
-    const documentHandler = function(mouseup, mousedown) {
-      if (!vnode.context ||
-        el.contains(mouseup.target) ||
-        (vnode.context.popperElm &&
-        (vnode.context.popperElm.contains(mouseup.target) ||
-        vnode.context.popperElm.contains(mousedown.target)))) return;
+    bind (el, binding, vnode) {
+        function documentHandler (e) {
+            if (el.contains(e.target)) {
+                return false;
+            }
+            if (binding.expression) {
+                binding.value(e);
+            }
+        }
+        el.__vueClickOutside__ = documentHandler;
+        document.addEventListener('click', documentHandler);
+    },
+    update () {
 
-      if (binding.expression &&
-        el[ctx].methodName &&
-        vnode.context[el[ctx].methodName]) {
-        vnode.context[el[ctx].methodName](mousedown,mouseup);
-      } else {
-        el[ctx].bindingFn && el[ctx].bindingFn(mousedown,mouseup);
-      }
-    };
-    el[ctx] = {
-      id,
-      documentHandler,
-      methodName: binding.expression,
-      bindingFn: binding.value
-    };
-  },
-
-  update(el, binding) {
-    el[ctx].methodName = binding.expression;
-    el[ctx].bindingFn = binding.value;
-  },
-
-  unbind(el) {
-    let len = nodeList.length;
-
-    for (let i = 0; i < len; i++) {
-      if (nodeList[i][ctx].id === el[ctx].id) {
-        nodeList.splice(i, 1);
-        break;
-      }
+    },
+    unbind (el, binding) {
+        document.removeEventListener('click', el.__vueClickOutside__);
+        delete el.__vueClickOutside__;
     }
-  }
 };

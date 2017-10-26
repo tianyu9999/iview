@@ -1,20 +1,22 @@
 <template>
     <div :class="wrapClasses">
-        <div :class="handlerClasses" @mouse.down="preventDefault" @click="preventDefault">
+        <div :class="handlerClasses">
             <a
                 @click="up"
+                @mousedown="preventDefault"
                 :class="upClasses">
-                <span :class="innerUpClasses"></span>
+                <span :class="innerUpClasses" @click="preventDefault"></span>
             </a>
             <a
                 @click="down"
+                @mousedown="preventDefault"
                 :class="downClasses">
-                <span :class="innerDownClasses"></span>
+                <span :class="innerDownClasses" @click="preventDefault"></span>
             </a>
         </div>
         <div :class="inputWrapClasses">
             <input
-	    	ref="textinput"
+                :id="elementId"
                 :class="inputClasses"
                 :disabled="disabled"
                 autocomplete="off"
@@ -22,9 +24,11 @@
                 @focus="focus"
                 @blur="blur"
                 @keydown.stop="keyDown"
+                @input="change"
                 @change="change"
+                :readonly="readonly || !editable"
                 :name="name"
-                :value="currentValue">
+                :value="precisionValue">
         </div>
     </div>
 </template>
@@ -35,9 +39,6 @@
     const prefixCls = 'ivu-input-number';
     const iconPrefixCls = 'ivu-icon';
 
-    function isValueNumber (value) {
-        return (/(^-?[0-9]+\.{1}\d+$)|(^-?[1-9][0-9]*$)|(^-?0{1}$)/).test(value + '');
-    }
     function addNum (num1, num2) {
         let sq1, sq2, m;
         try {
@@ -95,7 +96,21 @@
                 type: Boolean,
                 default: false
             },
+            readonly: {
+                type: Boolean,
+                default: false
+            },
+            editable: {
+                type: Boolean,
+                default: true
+            },
             name: {
+                type: String
+            },
+            precision: {
+                type: Number
+            },
+            elementId: {
                 type: String
             }
         },
@@ -150,26 +165,15 @@
             },
             inputClasses () {
                 return `${prefixCls}-input`;
+            },
+            precisionValue () {
+                // can not display 1.0
+                return this.precision ? this.currentValue.toFixed(this.precision) : this.currentValue;
             }
         },
         methods: {
             preventDefault (e) {
-				e = (e) ? e : ((window.event) ? window.event : null); 
-				e = e || window.event; // firefox下window.event为null, IE下event为null
-
-				//阻止默认浏览器动作(W3C) 
-				if ( e ){
-					if(e.preventDefault){
-						//IE中阻止函数器默认动作的方式 
-						e.preventDefault(); 
-						 //因此它支持W3C的stopPropagation()方法 
-						e.stopPropagation(); 
-					}else{
-						e.returnValue = false;
-						e.cancelBubble = true;
-					}
-				}
-				return false;
+                e.preventDefault();
             },
             up (e) {
                 const targetVal = Number(e.target.value);
@@ -186,7 +190,7 @@
                 this.changeStep('down', e);
             },
             changeStep (type, e) {
-                if (this.disabled) {
+                if (this.disabled || this.readonly) {
                     return false;
                 }
 
@@ -222,6 +226,9 @@
                 this.setValue(val);
             },
             setValue (val) {
+                // 如果 step 是小数，且没有设置 precision，是有问题的
+                if (!isNaN(this.precision)) val = Number(Number(val).toFixed(this.precision));
+
                 this.$nextTick(() => {
                     this.currentValue = val;
                     this.$emit('input', val);
@@ -231,23 +238,6 @@
             },
             focus () {
                 this.focused = true;
-				
-				const obj = this.$refs.textinput;
-				obj.focus();
-				this.$nextTick(()=>{
-					var len = 0;
-					if(obj.value){
-						len=obj.value.length;
-					}
-					if(obj.setSelectionRange){
-						obj.setSelectionRange(len,len);
-					}else{
-						const txt =obj.createTextRange(); 
-						txt.moveStart('character',len); 
-						txt.collapse(true); 
-						txt.select(); 
-					}			
-				});
             },
             blur () {
                 this.focused = false;
@@ -264,11 +254,13 @@
             change (event) {
                 let val = event.target.value.trim();
 
-                const max = this.max;
-                const min = this.min;
+                if (event.type == 'input' && val.match(/^\-?\.?$|\.$/)) return; // prevent fire early if decimal. If no more input the change event will fire later
+                if (event.type == 'change' && Number(val) === this.currentValue) return; // already fired change for input event
 
-                if (isValueNumber(val)) {
-                    val = Number(val);
+                const {min, max} = this;
+                const isEmptyString = val.length === 0;
+                val = Number(val);
+                if (!isNaN(val) && !isEmptyString) {
                     this.currentValue = val;
 
                     if (val > max) {
@@ -283,8 +275,8 @@
                 }
             },
             changeVal (val) {
-                if (isValueNumber(val) || val === 0) {
-                    val = Number(val);
+                val = Number(val);
+                if (!isNaN(val)) {
                     const step = this.step;
 
                     this.upDisabled = val + step > this.max;
