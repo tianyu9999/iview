@@ -176,7 +176,6 @@
                 showSlotFooter: true,
                 bodyHeight: 0,
                 bodyRealHeight: 0,
-				isSingleSelect:null,
                 scrollBarWidth: getScrollBarSize(),
                 currentContext: this.context,
                 cloneData: deepCopy(this.data)    // when Cell has a button to delete row data, clickCurrentRow will throw an error, so clone a data
@@ -402,12 +401,19 @@
             clickCurrentRow (_index) {
                 this.highlightCurrentRow (_index);
 				if(this.isSingleSelect){
-					this.singleSelect(_index);
+					if(!(this.$oldIndex==_index && this.objData[_index]._isChecked)){
+						this.singleSelect(_index);
+					}
 				}
                 this.$emit('on-row-click', this.objData[_index]);
             },
             dblclickCurrentRow (_index) {
                 this.highlightCurrentRow (_index);
+				if(this.isSingleSelect){
+					if(this.objData[_index]._isChecked){
+						this.singleSelect(_index);
+					}
+				}
                 this.$emit('on-row-dblclick', this.objData[_index]);
             },
             getSelection () {
@@ -430,7 +436,7 @@
                 this.objData[_index]._isChecked = status;
 
                 const selection = this.getSelection();
-                this.$emit(status ? 'on-select' : 'on-select-cancel', selection, JSON.parse(JSON.stringify(this.data[_index])));
+                this.$emit(status ? 'on-select' : 'on-select-cancel', selection, this.data[_index]);
                 this.$emit('on-selection-change', selection);
             },
             toggleExpand (_index) {
@@ -446,6 +452,7 @@
                 this.$emit('on-expand', this.objData[_index], status);
             },
 			singleSelect (_index) {
+				this.$oldIndex=_index;
 				let data = this.objData[_index+''];
 				
                 const status = !data._isChecked;
