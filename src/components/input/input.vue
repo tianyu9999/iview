@@ -228,7 +228,7 @@
 			focus (){
 				var obj = null;
 				if (this.type !== 'textarea') {
-					obj=this.$refs.textinput;
+					obj=this.$refs.input;
 					obj.focus();
 				}else{
 					obj=this.$refs.textarea;

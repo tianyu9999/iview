@@ -28,7 +28,8 @@
                 @change="change"
                 :readonly="readonly || !editable"
                 :name="name"
-                :value="precisionValue">
+                :value="precisionValue" 
+				ref="textinput">
         </div>
     </div>
 </template>
@@ -238,6 +239,23 @@
             },
             focus () {
                 this.focused = true;
+				
+				const obj = this.$refs.textinput;
+				obj.focus();
+				this.$nextTick(()=>{
+					var len = 0;
+					if(obj.value){
+						len=obj.value.length;
+					}
+					if(obj.setSelectionRange){
+						obj.setSelectionRange(len,len);
+					}else{
+						const txt =obj.createTextRange(); 
+						txt.moveStart('character',len); 
+						txt.collapse(true); 
+						txt.select(); 
+					}			
+				});
             },
             blur () {
                 this.focused = false;
