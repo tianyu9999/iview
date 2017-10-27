@@ -11,7 +11,7 @@
     </div>
 </template>
 <script>
-    import { getFirstDayOfMonth, getDayCountOfMonth } from '../util';
+    import { getFirstDayOfMonth, getDayCountOfMonth,formatDate } from '../util';
     import { deepCopy } from '../../../utils/assist';
     import Locale from '../../../mixins/locale';
 
@@ -175,8 +175,7 @@
                         const maxDate = null;
                         this.rangeState.selecting = true;
                         this.markRange(this.minDate);
-
-                        this.$emit('on-pick', {minDate, maxDate}, false);
+                        this.$nextTick(() =>this.$emit('on-pick', {minDate, maxDate}, false));
                     } else if (this.minDate && !this.maxDate) {
                         if (newDate >= this.minDate) {
                             const maxDate = new Date(newDate.getTime());
@@ -186,14 +185,14 @@
                         } else {
                             const minDate = new Date(newDate.getTime());
 
-                            this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false);
+                            this.$nextTick(() =>this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false));
                         }
                     } else if (!this.minDate) {
                         const minDate = new Date(newDate.getTime());
                         this.rangeState.selecting = true;
                         this.markRange(this.minDate);
 
-                        this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false);
+						this.$nextTick(() => this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false));
                     }
                 } else {
                     this.$emit('on-pick', newDate);
