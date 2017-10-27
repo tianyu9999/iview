@@ -409,11 +409,6 @@
             },
             dblclickCurrentRow (_index) {
                 this.highlightCurrentRow (_index);
-				if(this.isSingleSelect){
-					if(this.objData[_index]._isChecked){
-						this.singleSelect(_index);
-					}
-				}
                 this.$emit('on-row-dblclick', this.objData[_index]);
             },
             getSelection () {
@@ -452,6 +447,9 @@
                 this.$emit('on-expand', this.objData[_index], status);
             },
 			singleSelect (_index) {
+				if(this.$oldIndex!=_index){
+					this.$emit('on-select-change', this.objData[_index]);
+				}
 				this.$oldIndex=_index;
 				let data = this.objData[_index+''];
 				
