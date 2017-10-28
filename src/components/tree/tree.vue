@@ -57,6 +57,7 @@
         watch: {
             data: {
                 deep: true,
+				immediate: true,
                 handler () {
                     this.stateTree = this.data;
                     this.flatState = this.compileFlatState();
