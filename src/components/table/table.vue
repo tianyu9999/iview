@@ -794,6 +794,7 @@
                     setTimeout(() => {
                         this.cloneData = deepCopy(this.data);
                     }, 0);
+					this.$oldIndex=-1;
                 },
                 deep: true
             },
