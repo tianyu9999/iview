@@ -1,5 +1,5 @@
 <template>
-    <div :class="classes" ref="cell" v-clickoutside="handleHide" @click="cellClickHandel">
+    <div :class="classes">
         <template v-if="renderType === 'index'">{{naturalIndex + 1}}</template>
         <template v-if="renderType === 'selection'">
             <Checkbox :value="checked" @click.native.stop="handleClick" @on-change="toggleSelect" :disabled="disabled"></Checkbox>

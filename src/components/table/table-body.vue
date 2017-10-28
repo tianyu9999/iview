@@ -13,7 +13,7 @@
                     @mouseleave.native.stop="handleMouseOut(row._index)"
                     @click.native="clickCurrentRow(row._index)"
                     @dblclick.native.stop="dblclickCurrentRow(row._index)">
-                    <td v-for="column in columns" :class="alignCls(column, row)">
+                    <td v-for="column in columns" :class="alignCls(column, row)" @click="cellClickHandel(row._index,column._index)" v-clickoutside="handleHide(row._index,column._index)">
                         <Cell
                             :fixed="fixed"
                             :prefix-cls="prefixCls"
@@ -43,11 +43,13 @@
     import Cell from './cell.vue';
     import Expand from './expand.js';
     import Mixin from './mixin';
+	import clickoutside from '../../directives/clickoutside';
 
     export default {
         name: 'TableBody',
         mixins: [ Mixin ],
         components: { Cell, Expand, TableTr },
+		directives: { clickoutside },
         props: {
             prefixCls: String,
             styleObject: Object,
@@ -95,7 +97,16 @@
             },
             dblclickCurrentRow (_index) {
                 this.$parent.dblclickCurrentRow(_index);
-            }
+            },
+			cellClickHandel(rindex,cindex){
+				this.$children[rindex].$children[cindex].cellClickHandel();
+			},
+			handleHide(rindex,cindex){
+				var g=this;
+				return function(){
+					g.$children[rindex].$children[cindex].handleHide();
+				};	
+			}
         }
     };
 </script>
