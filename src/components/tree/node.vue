@@ -114,9 +114,9 @@
                 const Tree = findComponentUpward(this, 'Tree');
                 if (Tree) {
                     // ???? node(?flatState)??? node ???
-                    return [Tree.flatState, Tree.flatState.find(item => item.nodeKey === this.data.nodeKey)];
+                    return [this,Tree.flatState, Tree.flatState.find(item => item.nodeKey === this.data.nodeKey)];
                 } else {
-                    return [];
+                    return [this];
                 }
             }
         },
