@@ -17,6 +17,9 @@
             icon: {
                 type: String
             },
+			img:{
+				type:String
+			},
             disabled: {
                 type: Boolean,
                 default: false
@@ -51,7 +54,10 @@
             },
             disabled () {
                 this.updateNav();
-            }
+            },
+			img(){
+				this.updateNav();
+			}
         },
         mounted () {
             this.updateNav();
