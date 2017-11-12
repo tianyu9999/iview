@@ -3,18 +3,29 @@
         <div :class="[prefixCls + '-bar']">
             <div :class="[prefixCls + '-nav-container']">
                 <div :class="[prefixCls + '-nav-wrap']">
-                    <div :class="[prefixCls + '-nav-scroll']">
-                        <div :class="[prefixCls + '-nav']" ref="nav">
-                            <div :class="barClasses" :style="barStyle"></div>
-                            <div :class="tabCls(item)" v-for="(item, index) in navList" @click="handleChange(index)" @contextmenu="stopRight($event)"  @mousedown="showMenu($event,item,index)">
-                                <Icon v-if="item.icon !== ''" :type="item.icon"></Icon>
-                                <Render v-if="item.labelType === 'function'" :render="item.label"></Render>
-                                <template v-else>{{ item.label }}</template>
-                                <Icon v-if="showClose(item)" type="ios-close-empty" @click.native.stop="handleRemove(index)"></Icon>
-                            </div>
-                        </div>
-                        <div :class="[prefixCls + '-nav-right']" v-if="showSlot"><slot name="extra"></slot></div>
+                    <div :class="[prefixCls + '-nav-scroll']" ref="navMainScroll">
+						<ButtonGroup size="small" style="left:0px;top:5px;float:left" v-if="showArrow">
+							<Button type="ghost" :disabled="disabledLeftArrow" @click="moveTabLeft" icon="arrow-left-b">
+							</Button>
+							<Button type="ghost" :disabled="disabledRightArrow" @click="moveTabRight" icon="arrow-right-b">
+							</Button>
+						</ButtonGroup>
+						<div :class="[prefixCls + '-nav-scroll']" ref="navScroll" :style="tabsScrollBarStyle">
+							<div :class="[prefixCls + '-nav']" ref="nav" :style="tabsBarStyle">
+								<div :class="barClasses" :style="barStyle"></div>
+								<div :class="tabCls(item)" v-for="(item, index) in navList" @click="handleChange(index)" @contextmenu="stopRight($event)"  @mousedown="showMenu($event,item,index)">
+									<Icon v-if="item.icon !== ''" :type="item.icon"></Icon>
+									<Render v-if="item.labelType === 'function'" :render="item.label"></Render>
+									<template v-else>{{ item.label }}</template>
+									<Icon v-if="showClose(item)" type="ios-close-empty" @click.native.stop="handleRemove(index)"></Icon>
+								</div>
+							</div>
+						
+							<div :class="[prefixCls + '-nav-right']" v-if="showSlot"><slot name="extra"></slot></div>
+						</div>	
                     </div>
+	
+					
                 </div>
             </div>
         </div>
@@ -76,8 +87,12 @@
                 navList: [],
                 barWidth: 0,
                 barOffset: 0,
+				tabsBarLeft:0,
                 activeKey: this.value,
                 showSlot: false,
+				showArrow:false,
+				disabledLeftArrow:false,
+				disabledRightArrow:true,
 				showRightMenu:false,
 				rightTab:null,
 				rightPosition:{},
@@ -136,7 +151,29 @@
                 }
 
                 return style;
-            }
+            },
+			tabsBarStyle () {
+				let style ={
+					left:'0px'
+				};
+				 style.left = `${this.tabsBarLeft}px`;
+				 
+				 return style;
+			},
+			tabsScrollBarStyle () {
+				let style ={
+					left:'0px'
+				};
+				let w=0;
+				if(this.showArrow){
+					 w=20;
+				}
+				if(this.$refs.navMainScroll){
+					style.width=this.$refs.navMainScroll.offsetWidth-w;
+				}
+				 style.left = `${w}px`;
+				return style;
+			}
         },
         methods: {
             getTabs () {
@@ -179,6 +216,9 @@
                     } else {
                         this.barOffset = 0;
                     }
+					
+					let w=this.$refs.navScroll.offsetWidth-this.$refs.nav.offsetWidth;
+					this.showArrow=(w<0);
                 });
             },
             updateStatus () {
@@ -278,7 +318,8 @@
 						if(menuName==='closeall' && this.closable && (itm.closable==null || (itm.closable!=null && itm.closable))){
 							this.handleRemove(i);
 							i=0;
-							nvs=this.navList;	
+							nvs=this.navList;
+							continue;
 						}
 					}else{
 						if(this.closable && (itm.closable==null || (itm.closable!=null && itm.closable))){
@@ -292,6 +333,24 @@
 				this.rightTarget=null;
 				this.rightPosition={};
 				this.showRightMenu=false;
+			},
+			moveTabLeft(){
+				let w=this.$refs.navScroll.offsetWidth-(this.$refs.nav.offsetWidth+this.tabsBarLeft);
+				if(w<0){
+					let tmp=w<-20?-20:w;
+					this.tabsBarLeft+=tmp;
+					w=w-tmp;
+				}
+				this.disabledLeftArrow=(w>=0);
+				this.disabledRightArrow=false;
+			},
+			moveTabRight(){
+				let w=this.tabsBarLeft;
+				if(w<0){
+					this.tabsBarLeft+=(w<-20?20:-w);
+				}
+				this.disabledLeftArrow=false;
+				this.disabledRightArrow=(this.tabsBarLeft>=0);
 			}
         },
         watch: {
