@@ -285,7 +285,9 @@
                 if (this.bodyHeight !== 0) {
                     let height = this.bodyHeight + this.scrollBarWidth - 1;
 
-                    if (this.width && this.width < this.tableWidth){
+                    // #2102 里，如果 Table 没有设置 width，而是集成父级的 width，固定列也应该不包含滚动条高度，所以这里直接计算表格宽度
+                    const tableWidth = parseInt(getStyle(this.$el, 'width')) - 1;
+                    if ((this.width && this.width < this.tableWidth) || tableWidth < this.tableWidth){
                         height = this.bodyHeight;
                     }
 //                    style.height = this.scrollBarWidth > 0 ? `${this.bodyHeight}px` : `${this.bodyHeight - 1}px`;
@@ -338,6 +340,7 @@
                         this.tableWidth = parseInt(getStyle(this.$el, 'width')) - 1;
                     }
                     this.columnsWidth = {};
+                    if (!this.$refs.tbody) return;
                     this.$nextTick(() => {
                         let columnsWidth = {};
                         let autoWidthIndex = -1;
@@ -593,6 +596,7 @@
 
                 this.cloneColumns[index]._isFiltered = true;
                 this.cloneColumns[index]._filterVisible = false;
+                this.$emit('on-filter-change', column);
             },
             handleFilterSelect (index, value) {
                 this.cloneColumns[index]._filterChecked = [value];
@@ -606,6 +610,7 @@
                 let filterData = this.makeDataWithSort();
                 filterData = this.filterOtherData(filterData, index);
                 this.rebuildData = filterData;
+                this.$emit('on-filter-change', this.cloneColumns[index]);
             },
             makeData () {
                 let data =[];
@@ -738,19 +743,10 @@
                 let noHeader = false;
                 if ('noHeader' in params) noHeader = params.noHeader;
 
-                const data = Csv(columns, datas, ',', noHeader);
-                ExportCsv.download(params.filename, data);
-            },
-			single (){
-				let columns = this.columns;
-				const g = this;
-				columns.forEach((column, index) => {
-					if(column.type === 'radio'){
-						g.isSingleSelect = true;
-						return false;
-					}
-				 });
-			}
+                const data = Csv(columns, datas, params, noHeader);
+                if (params.callback) params.callback(data);
+                else ExportCsv.download(params.filename, data);
+            }
         },
         created () {
             if (!this.context) this.currentContext = this.$parent;

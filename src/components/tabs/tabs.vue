@@ -36,7 +36,7 @@
 <script>
     import Icon from '../icon/icon.vue';
     import Render from '../base/render';
-    import { oneOf } from '../../utils/assist';
+    import { oneOf, MutationObserver } from '../../utils/assist';
     import Emitter from '../../mixins/emitter';
 	import clickoutside from '../../directives/clickoutside';
 	import elementResizeDetectorMaker from 'element-resize-detector';
@@ -279,7 +279,6 @@
                 : 0;
             },
             setOffset(value) {
-				console.debug("1:::"+value);
                 this.navStyle.transform = `translateX(-${value}px)`;
             },
 			scrollToActiveTab() {
@@ -382,7 +381,17 @@
 				this.rightTarget=null;
 				this.rightPosition={};
 				this.showRightMenu=false;
-			}
+			},
+	     	 isInsideHiddenElement () {
+                let parentNode = this.$el.parentNode;
+               	while(parentNode && parentNode !== document.body) {
+                    if (parentNode.style.display === 'none') {
+                        return parentNode;
+                    }
+                   	parentNode = parentNode.parentNode;
+                }
+                return false;
+            },
         },
         watch: {
             value (val) {
@@ -392,7 +401,7 @@
                 this.updateBar();
                 this.updateStatus();
                 this.broadcast('Table', 'on-visible-change', true);
-				this.$nextTick(() => {
+                this.$nextTick(() => {
                     this.scrollToActiveTab();
                 });
             }
@@ -401,9 +410,22 @@
             this.showSlot = this.$slots.extra !== undefined;
             this.observer = elementResizeDetectorMaker();
             this.observer.listenTo(this.$refs.navWrap, this.handleResize);
+
+            const hiddenParentNode = this.isInsideHiddenElement();
+            if (hiddenParentNode) {
+                this.mutationObserver = new MutationObserver(() => {
+                    if (hiddenParentNode.style.display !== 'none') {
+                        this.updateBar();
+                        this.mutationObserver.disconnect();
+                    }
+                });
+
+                this.mutationObserver.observe(hiddenParentNode, { attributes: true, childList: true, characterData: true, attributeFilter: ['style'] });
+            }
         },
         beforeDestroy() {
             this.observer.removeListener(this.$refs.navWrap, this.handleResize);
+            if (this.mutationObserver) this.mutationObserver.disconnect();
         }
     };
 </script>

@@ -64,9 +64,9 @@
                 const parsedQuery = val.replace(/(\^|\(|\)|\[|\]|\$|\*|\+|\.|\?|\\|\{|\}|\|)/g, '\\$1');
                 this.hidden = !new RegExp(parsedQuery, 'i').test(this.searchLabel);
             },
-            // ÔÚÊ¹ÓÃº¯Êı·À¶¶ºó£¬ÉèÖÃ key ºó£¬²»¸üĞÂ×é¼şÁË£¬µ¼ÖÂSearchLabel ²»¸üĞÂ #1865
+            // åœ¨ä½¿ç”¨å‡½æ•°é˜²æŠ–åï¼Œè®¾ç½® key åï¼Œä¸æ›´æ–°ç»„ä»¶äº†ï¼Œå¯¼è‡´SearchLabel ä¸æ›´æ–° #1865
             updateSearchLabel () {
-                this.searchLabel = this.$el.innerHTML;
+                this.searchLabel = this.$el.textContent;
             }
         },
         mounted () {

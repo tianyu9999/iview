@@ -11,7 +11,7 @@
     </div>
 </template>
 <script>
-    import { getFirstDayOfMonth, getDayCountOfMonth,formatDate } from '../util';
+    import { getFirstDayOfMonth, getDayCountOfMonth } from '../util';
     import { deepCopy } from '../../../utils/assist';
     import Locale from '../../../mixins/locale';
 

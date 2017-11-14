@@ -113,7 +113,7 @@
             node () {
                 const Tree = findComponentUpward(this, 'Tree');
                 if (Tree) {
-                    // ???? node(?flatState)??? node ???
+                    // 将所有的 node（即flatState）和当前 node 都传递
                     return [this,Tree.flatState, Tree.flatState.find(item => item.nodeKey === this.data.nodeKey)];
                 } else {
                     return [this];

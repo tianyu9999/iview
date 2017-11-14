@@ -6,7 +6,7 @@
             @click="toggleMenu">
             <slot name="input">
                 <input type="hidden" :name="name" :value="model">
-                <div class="ivu-tag" v-for="(item, index) in selectedMultiple">
+                <div class="ivu-tag ivu-tag-checked" v-for="(item, index) in selectedMultiple">
                     <span class="ivu-tag-text">{{ item.label }}</span>
                     <Icon type="ios-close-empty" @click.native.stop="removeTag(index)"></Icon>
                 </div>
@@ -21,6 +21,8 @@
                     :class="[prefixCls + '-input']"
                     :placeholder="showPlaceholder ? localePlaceholder : ''"
                     :style="inputStyle"
+                    autocomplete="off"
+                    spellcheck="false"
                     @blur="handleBlur"
                     @keydown="resetInputState"
                     @keydown.delete="handleInputDelete"
@@ -52,7 +54,7 @@
     import { oneOf, findComponentDownward } from '../../utils/assist';
     import Emitter from '../../mixins/emitter';
     import Locale from '../../mixins/locale';
-    import {debounce} from './utils';
+    import { debounce } from './utils';
 
     const prefixCls = 'ivu-select';
 
@@ -369,6 +371,7 @@
 
                     const selectedArray = [];
                     const selectedObject = {};
+
                     selected.forEach(item => {
                         if (!selectedObject[item.value]) {
                             selectedArray.push(item);
@@ -376,7 +379,8 @@
                         }
                     });
 
-                    this.selectedMultiple = this.remote ? selectedArray : selected;
+                    // #2066
+                    this.selectedMultiple = this.remote ? this.model.length ? selectedArray : [] : selected;
 
                     if (slot) {
                         let selectedModel = [];
