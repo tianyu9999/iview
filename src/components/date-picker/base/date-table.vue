@@ -175,7 +175,8 @@
                         const maxDate = null;
                         this.rangeState.selecting = true;
                         this.markRange(this.minDate);
-                        this.$nextTick(() =>this.$emit('on-pick', {minDate, maxDate}, false));
+
+                        this.$emit('on-pick', {minDate, maxDate}, false);
                     } else if (this.minDate && !this.maxDate) {
                         if (newDate >= this.minDate) {
                             const maxDate = new Date(newDate.getTime());
@@ -185,14 +186,14 @@
                         } else {
                             const minDate = new Date(newDate.getTime());
 
-                            this.$nextTick(() =>this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false));
+                            this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false);
                         }
                     } else if (!this.minDate) {
                         const minDate = new Date(newDate.getTime());
                         this.rangeState.selecting = true;
                         this.markRange(this.minDate);
 
-						this.$nextTick(() => this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false));
+                        this.$emit('on-pick', {minDate, maxDate: this.maxDate}, false);
                     }
                 } else {
                     this.$emit('on-pick', newDate);
