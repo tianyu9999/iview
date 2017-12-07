@@ -275,13 +275,13 @@
             getCurrentScrollOffset() {
                 const { navStyle } = this;
                 return navStyle.transform
-                ? Number(navStyle.transform.match(/translateX\(-(\d+(\.\d+)*)px\)/)[1])
-                : 0;
+                    ? Number(navStyle.transform.match(/translateX\(-(\d+(\.\d+)*)px\)/)[1])
+                    : 0;
             },
             setOffset(value) {
                 this.navStyle.transform = `translateX(-${value}px)`;
             },
-			scrollToActiveTab() {
+            scrollToActiveTab() {
                 if (!this.scrollable) return;
                 const nav = this.$refs.nav;
                 const activeTab = this.$el.querySelector(`.${prefixCls}-tab-active`);
@@ -308,7 +308,7 @@
                     this.setOffset(Math.max(newOffset, 0));
                 }
             },
-			updateNavScroll(){
+            updateNavScroll(){
                 const navWidth = this.$refs.nav.offsetWidth;
                 const containerWidth = this.$refs.navScroll.offsetWidth;
                 const currentOffset = this.getCurrentScrollOffset();
@@ -384,14 +384,14 @@
 			},
 	     	 isInsideHiddenElement () {
                 let parentNode = this.$el.parentNode;
-               	while(parentNode && parentNode !== document.body) {
-                    if (parentNode.style.display === 'none') {
+                while(parentNode && parentNode !== document.body) {
+                    if (parentNode.style && parentNode.style.display === 'none') {
                         return parentNode;
                     }
-                   	parentNode = parentNode.parentNode;
+                    parentNode = parentNode.parentNode;
                 }
                 return false;
-            },
+            }
         },
         watch: {
             value (val) {

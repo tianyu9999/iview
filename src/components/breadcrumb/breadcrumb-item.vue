@@ -13,7 +13,7 @@
     </span>
 </template>
 <script>
-    // todo 3.0 Ê±·ÏÆú href
+    // todo 3.0 æ—¶åºŸå¼ƒ href
     const prefixCls = 'ivu-breadcrumb-item';
 
     export default {

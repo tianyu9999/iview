@@ -130,14 +130,38 @@
     <!--}-->
 <!--</script>-->
 
+<!--<template>-->
+    <!--<div>-->
+        <!--<Tabs type="card">-->
+            <!--<TabPane v-for="tab in tabs" :key="tab" :label="'标签' + tab">标签{{ tab }}</TabPane>-->
+        <!--</Tabs>-->
+        <!--<Button type="ghost" @click="handleTabsAdd" size="small">增加</Button>-->
+        <!--<Button type="ghost" @click="handleTabsMin" size="small">减少</Button>-->
+    <!--</div>-->
+<!--</template>-->
+<!--<script>-->
+    <!--export default {-->
+        <!--data () {-->
+            <!--return {-->
+                <!--tabs: 2-->
+            <!--}-->
+        <!--},-->
+        <!--methods: {-->
+            <!--handleTabsAdd () {-->
+                <!--this.tabs ++;-->
+            <!--},-->
+            <!--handleTabsMin () {-->
+                <!--this.tabs &#45;&#45;;-->
+            <!--}-->
+        <!--}-->
+    <!--}-->
+<!--</script>-->
+
 <template>
-    <div>
-        <Tabs type="card">
-            <TabPane v-for="tab in tabs" :key="tab" :label="'标签' + tab">标签{{ tab }}</TabPane>
-        </Tabs>
-        <Button type="ghost" @click="handleTabsAdd" size="small">增加</Button>
-        <Button type="ghost" @click="handleTabsMin" size="small">减少</Button>
-    </div>
+    <Tabs type="card">
+        <TabPane v-for="tab in tabs" :key="tab" :label="'标签' + tab">标签{{ tab }}</TabPane>
+        <Button type="ghost" @click="handleTabsAdd" size="small" slot="extra">增加</Button>
+    </Tabs>
 </template>
 <script>
     export default {
@@ -149,10 +173,9 @@
         methods: {
             handleTabsAdd () {
                 this.tabs ++;
-            },
-            handleTabsMin () {
-                this.tabs --;
             }
         }
     }
 </script>
+
+

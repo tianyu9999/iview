@@ -12,7 +12,7 @@
                         :indeterminate="data.indeterminate"
                         :disabled="data.disabled || data.disableCheckbox"
                         @click.native.prevent="handleCheck"></Checkbox>
-                <Render :class="titleClasses" v-if="data.render" :render="data.render" :data="data" :node="node"></Render>
+                <Render v-if="data.render" :render="data.render" :data="data" :node="node"></Render>
                 <Render v-else-if="isParentRender" :render="parentRender" :data="data" :node="node"></Render>
                 <span v-else :class="titleClasses" @click="handleSelect">{{ data.title }}</span>
                 <Tree-node
