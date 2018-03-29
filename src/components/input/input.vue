@@ -135,6 +135,12 @@
             },
             elementId: {
                 type: String
+            },
+            wrap: {
+                validator (value) {
+                    return oneOf(value, ['hard', 'soft']);
+                },
+                default: 'soft'
             }
         },
         data () {
@@ -266,6 +272,12 @@
                 } else {
                     this.$refs.input.blur();
                 }
+            },
+            handleClear () {
+                const e = { target: { value: '' } };
+                this.$emit('input', '');
+                this.setCurrentValue('');
+                this.$emit('on-change', e);
             }
         },
         watch: {
