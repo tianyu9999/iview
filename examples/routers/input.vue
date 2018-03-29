@@ -1,20 +1,16 @@
 <template>
-    <div>
-        {{ value1 }}
-        <Input v-model="value1" clearable icon="ios-clock-outline" size="large" placeholder="large size"></Input>
-        <br>
-        <Input v-model="value2" clearable placeholder="default size"></Input>
-        <br>
-        <Input v-model="value3" clearable size="small" placeholder="small size"></Input>
+    <div style="width: 200px;margin: 100px;">
+        {{ value6 }}
+        <Input v-model="value5" type="textarea" placeholder="Enter something..."></Input>
+        <Input v-model="value6" type="textarea" :rows="4" placeholder="Enter something..."></Input>
     </div>
 </template>
 <script>
     export default {
         data () {
             return {
-                value1: '',
-                value2: '',
-                value3: ''
+                value5: '',
+                value6: ''
             }
         }
     }
