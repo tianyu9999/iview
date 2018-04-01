@@ -36,7 +36,7 @@
 <script>
     import Icon from '../icon/icon.vue';
     import Render from '../base/render';
-    import { oneOf, MutationObserver } from '../../utils/assist';
+    import { oneOf, MutationObserver,isIE,ieVersion} from '../../utils/assist';
     import Emitter from '../../mixins/emitter';
 	import clickoutside from '../../directives/clickoutside';
 	import elementResizeDetectorMaker from 'element-resize-detector';
@@ -407,6 +407,9 @@
             }
         },
         mounted () {
+		    if(isIE() && ieVersion()<10){
+                this.animated = false;
+            }
             this.showSlot = this.$slots.extra !== undefined;
             this.observer = elementResizeDetectorMaker();
             this.observer.listenTo(this.$refs.navWrap, this.handleResize);

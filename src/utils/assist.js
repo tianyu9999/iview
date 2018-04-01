@@ -1,5 +1,6 @@
 import Vue from 'vue';
 const isServer = Vue.prototype.$isServer;
+const userAgent = navigator.userAgent; //取得浏览器的userAgent字符串 
 // 判断参数是否是其中之一
 export function oneOf (value, validList) {
     for (let i = 0; i < validList.length; i++) {
@@ -321,4 +322,28 @@ export function setMatchMedia () {
         };
         window.matchMedia = window.matchMedia || matchMediaPolyfill;
     }
+}
+
+export function isIE(){
+	let isOpera = userAgent.indexOf("Opera") > -1; //判断是否Opera浏览器 
+	return userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera;
+}
+
+export function ieVersion(){
+	let reIE = new RegExp("MSIE (\\d+\\.\\d+);");
+    reIE.test(userAgent);
+    let fIEVersion = parseFloat(RegExp["$1"]);
+    if(fIEVersion == 7) {
+        return 7;
+    } else if(fIEVersion == 8) {
+        return 8;
+    } else if(fIEVersion == 9) {
+        return 9;
+    } else if(fIEVersion == 10) {
+        return 10;
+    }else if(fIEVersion == 11) {
+        return 11;
+    } else {
+        return 6;//IE版本<=7
+    }   
 }
