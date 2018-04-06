@@ -179,7 +179,7 @@
                 return this.precision ? this.currentValue.toFixed(this.precision) : this.currentValue;
             },
             formatterValue () {
-                if (this.formatter) {
+                if (this.formatter && this.precisionValue !== null) {
                     return this.formatter(this.precisionValue);
                 } else {
                     return this.precisionValue;
@@ -296,6 +296,10 @@
                 const isEmptyString = val.length === 0;
                 val = Number(val);
 
+                if(isEmptyString){
+                    this.setValue(null);
+                    return;
+                }
                 if (event.type == 'change'){
                     if (val === this.currentValue && val > min && val < max) return; // already fired change for input event
                 }

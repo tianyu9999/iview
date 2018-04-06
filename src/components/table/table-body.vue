@@ -1,7 +1,7 @@
 <template>
     <table cellspacing="0" cellpadding="0" border="0" :style="styleObject">
         <colgroup>
-            <col v-for="(column, index) in columns" :width="setCellWidth(column, index, false)">
+            <col v-for="(column, index) in columns" :width="setCellWidth(column)">
         </colgroup>
         <tbody :class="[prefixCls + '-tbody']">
             <template v-for="(row, index) in data">
@@ -99,12 +99,18 @@
                 this.$parent.dblclickCurrentRow(_index);
             },
 			cellClickHandel(rindex,cindex){
-				this.$children[rindex].$children[cindex].cellClickHandel();
+				let cobj=this.$children[rindex];
+				if(cobj && cobj.$children[cindex]){
+					cobj.$children[cindex].cellClickHandel();
+				}
 			},
 			handleHide(rindex,cindex){
 				var g=this;
 				return function(){
-					g.$children[rindex].$children[cindex].handleHide();
+					let cobj=g.$children[rindex];
+					if(cobj && cobj.$children[cindex]){
+						cobj.$children[cindex].handleHide();
+					}				
 				};	
 			}
         }
