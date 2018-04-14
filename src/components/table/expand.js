@@ -18,9 +18,9 @@ export default {
         if (ctx.props.column) params.column = ctx.props.column;
 		let hh;
 		try{
-			hh=ctx.props.render(h,params.row.item,params.column,params.index);
+			hh=ctx.props.render.apply(this,[h,params.row.item,params.column,params.index]);
 		}catch(e){
-			hh=ctx.props.render(h, params);
+			hh=ctx.props.render.apply(this,[h, params]);
 		}
         return hh;
     }

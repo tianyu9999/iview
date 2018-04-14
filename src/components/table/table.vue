@@ -835,7 +835,7 @@
                     }
 					newRow.item = row;
 					newRow._index = index;
-					row._rowKey = rowKey++;
+					newRow._rowKey = rowKey++;
                     data[index] = newRow;
                 });
                 return data;
