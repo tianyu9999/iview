@@ -15,12 +15,12 @@
         methods: {
             rowClasses (_index) {
                 return [
-                    `${this.prefixCls}-row`,
-                    this.rowClsName(_index),
+                    `${this.prefixCls}-row`,                  
                     {
                         [`${this.prefixCls}-row-highlight`]: this.objData[_index] && this.objData[_index]._isHighlight,
                         [`${this.prefixCls}-row-hover`]: this.objData[_index] && this.objData[_index]._isHover
-                    }
+                    },
+					this.rowClsName(_index)
                 ];
             },
             rowClsName (_index) {

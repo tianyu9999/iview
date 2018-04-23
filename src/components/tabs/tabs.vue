@@ -406,7 +406,7 @@
             }
         },
         mounted () {
-		    if(isIE() && ieVersion()<10){
+		    if(isIE() && ieVersion()<=11){
                 this.animated = false;
             }
             this.showSlot = this.$slots.extra !== undefined;
