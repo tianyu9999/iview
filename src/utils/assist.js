@@ -325,8 +325,9 @@ export function setMatchMedia () {
 }
 
 export function isIE(){
-	let isOpera = userAgent.indexOf("Opera") > -1; //判断是否Opera浏览器 
-	return userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera;
+	let isOpera = userAgent.indexOf("Opera") > -1; //判断是否Opera浏览器
+    let isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0") > -1; 
+	return (userAgent.indexOf("compatible") > -1 && userAgent.indexOf("MSIE") > -1 && !isOpera)||isIE11;
 }
 
 export function ieVersion(){
