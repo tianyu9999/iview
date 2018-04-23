@@ -333,6 +333,7 @@ export function ieVersion(){
 	let reIE = new RegExp("MSIE (\\d+\\.\\d+);");
     reIE.test(userAgent);
     let fIEVersion = parseFloat(RegExp["$1"]);
+	let isIE11 = userAgent.indexOf('Trident') > -1 && userAgent.indexOf("rv:11.0") > -1;
     if(fIEVersion == 7) {
         return 7;
     } else if(fIEVersion == 8) {
@@ -341,7 +342,7 @@ export function ieVersion(){
         return 9;
     } else if(fIEVersion == 10) {
         return 10;
-    }else if(fIEVersion == 11) {
+    }else if(isIE11) {
         return 11;
     } else {
         return 6;//IE版本<=7
