@@ -26,10 +26,12 @@
                 @blur="blur"
                 @keydown.stop="keyDown"
                 @input="change"
+                @mouseup="preventDefault"
                 @change="change"
                 :readonly="readonly || !editable"
                 :name="name"
                 :value="formatterValue" 
+		:placeholder="placeholder"
 				ref="textinput">
         </div>
     </div>
@@ -120,6 +122,10 @@
             },
             parser: {
                 type: Function
+            },
+            placeholder: {
+                type: String,
+                default: ''
             }
         },
         data () {
@@ -253,7 +259,7 @@
             },
             focus () {
                 this.focused = true;
-	    	this.$emit('on-focus');	
+	    	this.$emit('on-focus',event);	
 				const obj = this.$refs.textinput;
 				obj.focus();
 				this.$nextTick(()=>{
