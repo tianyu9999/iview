@@ -135,6 +135,9 @@
                     display: 'none',
                     width: `${this.barWidth}px`
                 };
+                if(isIE() && ieVersion()<=11){
+                    this.animated = false;
+                }
                 if (this.type === 'line') style.display = 'block';
                 if (this.animated) {
                     style.transform = `translate3d(${this.barOffset}px, 0px, 0px)`;
@@ -406,9 +409,6 @@
             }
         },
         mounted () {
-		    if(isIE() && ieVersion()<=11){
-                this.animated = false;
-            }
             this.showSlot = this.$slots.extra !== undefined;
             this.observer = elementResizeDetectorMaker();
             this.observer.listenTo(this.$refs.navWrap, this.handleResize);

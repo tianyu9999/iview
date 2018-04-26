@@ -197,6 +197,10 @@
                 e.preventDefault();
             },
             up (e) {
+				if(e.stopPropagation){
+					e.stopPropagation();
+				}
+				this.preventDefault(e);
                 const targetVal = Number(e.target.value);
                 if (this.upDisabled && isNaN(targetVal)) {
                     return false;
@@ -209,6 +213,10 @@
                     return false;
                 }
                 this.changeStep('down', e);
+				if(e.stopPropagation){
+					e.stopPropagation();
+				}
+				this.preventDefault(e);
             },
             changeStep (type, e) {
                 if (this.disabled || this.readonly) {

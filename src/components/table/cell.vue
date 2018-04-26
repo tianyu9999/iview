@@ -146,6 +146,7 @@
 					if(this.renderCell){						
 						this.$refs.renderContainer.appendChild(this.renderCell);
 					}
+					this.row.editCell=false;
 				}
 			}
         },

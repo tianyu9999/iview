@@ -105,13 +105,22 @@
 				}
 			},
 			handleHide(rindex,cindex){
-				var g=this;
-				return function(){
-					let cobj=g.$children[rindex];
-					if(cobj && cobj.$children[cindex]){
-						cobj.$children[cindex].handleHide();
-					}				
-				};	
+				let g=this;
+				let col=g._props.columns[cindex];
+				if(col.editRender){
+					return function(e){
+						let cobj=g.$children[rindex];
+						
+						if(cobj && cobj.$children[cindex]){
+							let celObj= cobj.$children[cindex];
+							if(e.srcElement.__vue__ && e.srcElement.__vue__!=celObj){
+								celObj.handleHide();
+							}
+						}				
+					};
+				}else{
+					return function(){};
+				}
 			}
         }
     };

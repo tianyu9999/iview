@@ -189,7 +189,7 @@
                 bodyHeight: 0,
                 scrollBarWidth: getScrollBarSize(),
                 currentContext: this.context,
-                cloneData: deepCopy(this.data),    // when Cell has a button to delete row data, clickCurrentRow will throw an error, so clone a data
+                //cloneData: deepCopy(this.data),    // when Cell has a button to delete row data, clickCurrentRow will throw an error, so clone a data
                 showVerticalScrollBar:false,
                 showHorizontalScrollBar:false,
                 headerWidth:0,
@@ -689,7 +689,7 @@
                 this.cloneColumns[index]._sortType = type;
 
                 this.$emit('on-sort-change', {
-                    column: JSON.parse(JSON.stringify(this.allColumns[this.cloneColumns[index]._index])),
+                    column: this.allColumns[this.cloneColumns[index]._index],
                     key: key,
                     order: type
                 });
@@ -945,12 +945,11 @@
                         this.fixedHeader();
                     }
                     // here will trigger before clickCurrentRow, so use async
-                    setTimeout(() => {
-                        this.cloneData = deepCopy(this.data);
-                    }, 0);
+                    //setTimeout(() => {
+                       // this.cloneData = deepCopy(this.data);
+                   // }, 0);
 					this.$oldIndex=-1;
-                },
-                deep: true
+                }
             },
             columns: {
                 handler () {
@@ -964,8 +963,7 @@
                     this.rightFixedColumnRows = this.makeColumnRows('right', colsWithId);
                     this.rebuildData = this.makeDataWithSortAndFilter();
                     this.handleResize();
-                },
-                deep: true
+                }
             },
             height () {
                 this.handleResize();
