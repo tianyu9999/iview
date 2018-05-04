@@ -1,3 +1,13 @@
+<style>
+  .ivu-table .demo-table-info-cell-age {
+        background-color: #2db7f5;
+        color: #fff;
+  }
+  .ivu-table .demo-table-info-cell-name {
+        background-color: #ff6600;
+        color: #fff;
+    }
+</style>
 <template>
     <div>
         <Table border :columns="columns7" :data="data6"></Table>
@@ -67,12 +77,18 @@
                     {
                         name: '李小红',
                         age: 30,
-                        address: '上海市浦东新区世纪大道'
+                        address: '上海市浦东新区世纪大道',
+						cellClassName: {
+                            name: 'demo-table-info-cell-name'
+                        }
                     },
                     {
                         name: '周小伟',
                         age: 26,
-                        address: '深圳市南山区深南大道'
+                        address: '深圳市南山区深南大道',
+						cellClassName: {
+                            age: 'demo-table-info-cell-age'
+                        }
                     }
                 ]
             }

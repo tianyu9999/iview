@@ -2,8 +2,8 @@ export default {
     methods: {
         alignCls (column, row = {}) {
             let cellClassName = '';
-            if (row.cellClassName && column.key && row.cellClassName[column.key]) {
-                cellClassName = row.cellClassName[column.key];
+            if (row.item && row.item.cellClassName && column.key && row.item.cellClassName[column.key]) {
+                cellClassName = row.item.cellClassName[column.key];
             }
             return [
                 {
