@@ -113,7 +113,7 @@
 						
 						if(cobj && cobj.$children[cindex]){
 							let celObj= cobj.$children[cindex];
-							if(e.srcElement.__vue__ && e.srcElement.__vue__!=celObj){
+							if(celObj){
 								celObj.handleHide();
 							}
 						}				
