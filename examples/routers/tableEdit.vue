@@ -51,7 +51,12 @@
                         key: 'address',
 						editRender:function(row,index){
 							return '<i-input v-model="row.address"></i-input>';
-						}
+                        },
+                        cellClassName:function(row){
+                            if(row && row.age==25){
+                               return 'demo-table-info-cell-name';
+                            }
+                        }
                     },
                     {
                         title: '操作',
