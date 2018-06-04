@@ -1,5 +1,5 @@
 <template>
-    <i :class="classes" :style="styles" :title="title"></i>
+    <i :class="classes" :style="styles" @click="handleClick" :title="title"></i>
 </template>
 <script>
     const prefixCls = 'ivu-icon';
@@ -34,6 +34,11 @@
                 }
 
                 return style;
+            }
+        },
+        methods: {
+            handleClick (event) {
+                this.$emit('click', event);
             }
         }
     };
