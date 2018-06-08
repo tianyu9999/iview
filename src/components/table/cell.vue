@@ -107,7 +107,7 @@
 				if(this.renderType === 'edit'){
 					return;
 				}
-				if(this.column.editRender){
+				if(this.column.editRender || this.column.editTemplate){
 					this.oldRenderType = this.renderType;
 					this.renderType = 'edit';
 					this.$nextTick(()=>{
@@ -117,10 +117,21 @@
 						if(this.editCell){
 							this.$refs.renderContainer.appendChild(this.editCell.$el);
 						}else{
-							const component = new Vue({
+							let g=this;							
+							let component =null;
+							if(this.column.editTemplate){
+								component=new Vue({
+									functional: true,
+									template:this.column.editTemplate(this.row.item, this.column)					
+								});
+							}else if(this.column.editRender){
+								component=new Vue({
 								functional: true,
-								template:this.column.editRender(this.row.item, this.column)					
-							});
+								render:function (createElement, context){
+										return g.column.editRender(createElement,context,g.row.item, g.column);
+									}		
+								});
+							}							
 							component.row = this.row.item;
 							component.column = this.column;
 							this.editCell = component.$mount();
@@ -129,8 +140,7 @@
 						if(this.editCell._vnode.componentInstance && this.editCell._vnode.componentInstance.focus){
 							const g=this;
 							this.$nextTick(()=>{
-								g.editCell._vnode.componentInstance.focus();
-								
+								g.editCell._vnode.componentInstance.focus();								
 							});
 						}		
 					});

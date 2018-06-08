@@ -10,6 +10,7 @@
 </style>
 <template>
     <div>
+		<Input v-model="data2" ></Input>
         <Table border :columns="columns7" :data="data6"></Table>
         <Button @click="handleAdd"> + 1</Button>
     </div>
@@ -21,6 +22,7 @@
         data () {
             return {
                 data1: 1,
+				data2:100,
 //                self: this,
                 columns7: [{key:'radio',type:'radio'},
                     {
@@ -46,6 +48,28 @@
 							return '<input-number v-model="row.age" ref="input" :min="1" :max="150"></input-number>';
 						}
                     },
+					{
+						title:'数据',
+						key:'num',
+						type:'render',
+						render : function(h,row,column,index){
+							return h("div",
+								[h('i-input', {
+									props : {
+										type : 'text',
+										value : row.num
+									},
+									on:{
+										'on-change':function(val){
+											row.num= val.currentTarget.value;
+											row.cal =row.num*100;
+										}
+									}
+							}),[h("span","%")]
+						]);
+					}
+
+					},
                     {
                         title: '地址',
                         key: 'address',
@@ -58,6 +82,10 @@
                             }
                         }
                     },
+					{
+						title:'计算',
+						key:'cal'
+					},
                     {
                         title: '操作',
                         key: 'action',
@@ -72,17 +100,23 @@
                     {
                         name: '王小明',
                         age: 18,
-                        address: '北京市朝阳区芍药居'
+                        address: '北京市朝阳区芍药居',
+						num:0,
+						cal:0
                     },
                     {
                         name: '张小刚',
                         age: 25,
-                        address: '北京市海淀区西二旗'
+                        address: '北京市海淀区西二旗',
+						num:0,
+						cal:0
                     },
                     {
                         name: '李小红',
                         age: 30,
                         address: '上海市浦东新区世纪大道',
+						cal:0,
+						num:0,
 						cellClassName: {
                             name: 'demo-table-info-cell-name'
                         }
@@ -91,6 +125,8 @@
                         name: '周小伟',
                         age: 26,
                         address: '深圳市南山区深南大道',
+						cal:0,
+						num:0,
 						cellClassName: {
                             age: 'demo-table-info-cell-age'
                         }

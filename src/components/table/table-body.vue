@@ -107,7 +107,7 @@
 			handleHide(rindex,cindex){
 				let g=this;
 				let col=g._props.columns[cindex];
-				if(col.editRender){
+				if(col.editRender || col.editTemplate){
 					return function(e){
 						let cobj=g.$children[rindex];
 						
