@@ -44,7 +44,7 @@
                     {
                         title: '年龄',
                         key: 'age',
-						editRender:function(row,index){
+						editTemplate:function(row,index){
 							return '<input-number v-model="row.age" ref="input" :min="1" :max="150"></input-number>';
 						}
                     },
@@ -73,7 +73,7 @@
                     {
                         title: '地址',
                         key: 'address',
-						editRender:function(row,index){
+						editTemplate:function(row,index){
 							return '<i-input v-model="row.address"></i-input>';
                         },
                         cellClassName:function(row){
